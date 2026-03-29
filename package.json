@@ -13,8 +13,8 @@
   "scripts": {
     "dev": "turbo run dev",
     "dev:webpack": "turbo run dev:webpack",
-    "dev:rspack": "turbo run dev:rspack",
-    "dev:vite": "turbo run dev:vite",
+    "dev:rspack": "turbo run dev:webpack --filter=app-counter --filter=app-table & turbo run dev:rspack --filter=portal-shell --filter=app-people-list",
+    "dev:vite": "turbo run dev:webpack --filter=app-counter --filter=app-table & turbo run dev:vite --filter=portal-shell --filter=app-people-list",
     "build": "turbo run build",
     "build:webpack": "turbo run build:webpack",
     "build:rspack": "turbo run build:rspack",
