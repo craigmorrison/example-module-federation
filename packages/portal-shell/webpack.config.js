@@ -37,6 +37,7 @@ module.exports = {
   output: {
     filename: 'portal.js',
     path: path.resolve(__dirname, 'dist'),
+    crossOriginLoading: 'anonymous',
     clean: true
   },
   plugins: [

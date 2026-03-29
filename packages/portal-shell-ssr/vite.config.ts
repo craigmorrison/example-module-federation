@@ -4,6 +4,6 @@ import { defineConfig } from 'vite';
 export default defineConfig({
   plugins: [reactRouter()],
   server: {
-    port: 3004
+    port: 4000
   }
 });

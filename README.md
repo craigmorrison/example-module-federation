@@ -27,7 +27,7 @@ A proof of concept showing Module Federation working across **Webpack**, **Rspac
               │ portal-shell-ssr │  (alternative consumer)
               │  MF v2 consumer  │
               │  SSR via RR7     │
-              │  :3004           │
+              │  :4000           │
               └──────────────────┘
 ```
 
@@ -66,11 +66,18 @@ npm install
 ## Running
 
 ```shell
-npm run dev           # SPA consumer (:3000) + all producers
-npm run dev:ssr       # SSR consumer (:3004) + all producers
+npm run dev
 ```
 
-Then open **http://localhost:3000** (SPA) or **http://localhost:3004** (SSR) and navigate to `/table`, `/counter`, `/people`.
+This starts everything:
+
+- **http://localhost:3000** — SPA consumer (webpack)
+- **http://localhost:4000** — SSR consumer (React Router 7)
+- `:3001` — app-table (rspack producer)
+- `:3002` — app-counter (webpack producer)
+- `:3003` — app-people-list (vite producer)
+
+Navigate to `/table`, `/counter`, `/people` on either consumer.
 
 ## Building
 

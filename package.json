@@ -11,8 +11,7 @@
   ],
   "private": true,
   "scripts": {
-    "dev": "turbo run dev --filter=!portal-shell-ssr",
-    "dev:ssr": "turbo run dev:webpack --filter=app-counter --filter=app-table --filter=app-people-list & turbo run dev --filter=portal-shell-ssr",
+    "dev": "turbo run dev",
     "build": "turbo run build",
     "test": "vitest run",
     "test:watch": "vitest",
