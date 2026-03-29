@@ -13,7 +13,9 @@
     "build": "npm run build:webpack",
     "build:webpack": "webpack --mode production -c ./webpack.config.js",
     "dev:rspack": "rspack serve -c ./rspack.config.js",
-    "build:rspack": "rspack build -c ./rspack.config.js"
+    "build:rspack": "rspack build -c ./rspack.config.js",
+    "dev:vite": "vite -c ./vite.config.js",
+    "build:vite": "vite build -c ./vite.config.js"
   },
   "dependencies": {
     "react": "^19.1.0",

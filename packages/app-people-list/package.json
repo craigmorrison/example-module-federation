@@ -11,6 +11,8 @@
     "build:webpack": "tsc && webpack --mode production -c ./webpack.config.js",
     "dev:rspack": "rspack serve -c ./rspack.config.js",
     "build:rspack": "tsc && rspack build -c ./rspack.config.js",
+    "dev:vite": "vite -c ./vite.config.js",
+    "build:vite": "tsc && vite build -c ./vite.config.js",
     "test": "echo \"no tests yet\"",
     "lint": "oxlint --fix .",
     "format": "oxfmt ."
