@@ -1,22 +1,17 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const { ModuleFederationPlugin } = require('webpack').container;
-const deps = require('./package.json').dependencies;
+const { ModuleFederationPlugin } = require('@module-federation/enhanced/webpack');
+const federationConfig = require('./federation.config');
 
 module.exports = {
   entry: './src/app.js',
   mode: 'development',
   devServer: {
-    contentBase: path.join(__dirname, 'dist'),
+    static: path.join(__dirname, 'dist'),
     port: 3000,
     historyApiFallback: true,
-    hot: false,
-    hotOnly: false,
     headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
-      'Access-Control-Allow-Headers':
-        'X-Requested-With, content-type, Authorization'
+      'Access-Control-Allow-Origin': '*'
     }
   },
   module: {
@@ -25,9 +20,12 @@ module.exports = {
         test: /\.m?jsx?$/,
         exclude: /node_modules/,
         use: {
-          loader: 'babel-loader',
+          loader: 'swc-loader',
           options: {
-            rootMode: 'upward'
+            jsc: {
+              parser: { syntax: 'ecmascript', jsx: true },
+              transform: { react: { runtime: 'automatic' } }
+            }
           }
         }
       }
@@ -38,36 +36,11 @@ module.exports = {
   },
   output: {
     filename: 'portal.js',
-    path: path.resolve(__dirname, 'dist')
+    path: path.resolve(__dirname, 'dist'),
+    clean: true
   },
-  devtool: 'inline-source-map',
   plugins: [
-    new HtmlWebpackPlugin({
-      template: './static/index.ejs'
-    }),
-    new ModuleFederationPlugin({
-      name: 'shell',
-      filename: 'remoteEntry.js',
-      remotes: {
-        table: 'table@http://localhost:3001/table-remote-entry.js',
-        counter: 'counter@http://localhost:3002/counter-remote-entry.js',
-        people: 'people@http://localhost:3003/people-remote-entry.js'
-      },
-      shared: [
-        {
-          ...deps,
-          react: {
-            eager: true,
-            singleton: true,
-            requiredVersion: deps.react
-          },
-          'react-dom': {
-            eager: true,
-            singleton: true,
-            requiredVersion: deps['react-dom']
-          }
-        }
-      ]
-    })
+    new HtmlWebpackPlugin({ template: './static/index.html' }),
+    new ModuleFederationPlugin(federationConfig)
   ]
 };
