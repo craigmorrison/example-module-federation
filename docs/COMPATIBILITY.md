@@ -2,35 +2,37 @@
 
 A practical reference for migrating from native webpack Module Federation (v1) to `@module-federation/enhanced` (v2), covering shared module configurations, migration paths, and cross-bundler interop.
 
+> **Terminology**: MF v2 uses **consumer** (the app that loads federated modules via `remotes`) and **producer** (the app that exposes modules via `exposes`). The older terms "host" and "remote" refer to the same concepts.
+
 ## Migration paths
 
 There are two valid migration orders. Which one you use depends on your shared module configuration.
 
-### Path A: Host first (recommended when possible)
+### Path A: Consumer first (recommended when possible)
 
 ```
-1. Upgrade the host to @module-federation/enhanced v2
-2. Deploy — v2 host consumes v1 remotes via backward-compatible shared scope patching
-3. Migrate remotes one-by-one to v2
-4. Each migrated remote gains access to rspack/vite bundler options
+1. Upgrade the consumer to @module-federation/enhanced v2
+2. Deploy — v2 consumer loads v1 producers via backward-compatible shared scope patching
+3. Migrate producers one-by-one to v2
+4. Each migrated producer gains access to rspack/vite bundler options
 ```
 
-**Use when**: simple shared config, few shared deps, consistent `eager`/`singleton` settings across all remotes, no `strictVersion`, no custom share scopes.
+**Use when**: simple shared config, few shared deps, consistent `eager`/`singleton` settings across all producers, no `strictVersion`, no custom share scopes.
 
-### Path B: Remotes first
+### Path B: Producers first
 
 ```
-1. Migrate one low-risk remote to v2
-2. Deploy behind the existing v1 host — v2 remote entries still produce standard
-   remoteEntry.js files that v1 hosts can load
+1. Migrate one low-risk producer to v2
+2. Deploy behind the existing v1 consumer — v2 producers still produce standard
+   remoteEntry.js files that v1 consumers can load
 3. Validate shared module behavior in production
-4. Migrate more remotes
-5. Upgrade the host last
+4. Migrate more producers
+5. Upgrade the consumer last
 ```
 
-**Use when**: complex shared config, `strictVersion: true` on remotes, custom share scopes, custom runtime code that touches webpack sharing internals, or too many shared deps to audit safely.
+**Use when**: complex shared config, `strictVersion: true` on producers, custom share scopes, custom runtime code that touches webpack sharing internals, or too many shared deps to audit safely.
 
-**Note**: v2-specific features (manifest, type hints, preloading, Chrome devtools) are not available until both host and remote are on v2. Path B gives you a safe rollout but delays v2 benefits.
+**Note**: v2-specific features (manifest, type hints, preloading, Chrome devtools) are not available until both consumer and producer are on v2. Path B gives you a safe rollout but delays v2 benefits.
 
 ---
 
@@ -38,24 +40,24 @@ There are two valid migration orders. Which one you use depends on your shared m
 
 ### `eager`
 
-| Host | Remote | Result |
+| Consumer | Producer | Result |
 |---|---|---|
 | `true` | `true` | Both bundle their own copy. The shared scope negotiation picks one at runtime. No async loading needed. **Safest configuration.** |
-| `true` | `false` | Host's copy is available synchronously. Remote's copy loads async during `import('./bootstrap')`. Works if the remote has the async bootstrap pattern. |
-| `false` | `true` | Remote's copy is available synchronously but the host hasn't initialised the shared scope yet. **Can cause load-order failures** — the remote's eager copy may not register in time. |
+| `true` | `false` | Consumer's copy is available synchronously. Producer's copy loads async during `import('./bootstrap')`. Works if the producer has the async bootstrap pattern. |
+| `false` | `true` | Producer's copy is available synchronously but the consumer hasn't initialised the shared scope yet. **Can cause load-order failures** — the producer's eager copy may not register in time. |
 | `false` | `false` | Both copies load async. Requires the bootstrap pattern on both sides. Standard MF v1 setup. Works in v1→v2 migration as long as both sides have the async boundary. |
 
-**Key point**: `eager` is a build-time decision that changes the webpack chunk graph. It cannot be negotiated at runtime. Changing it during migration changes how chunks are structured and can break other remotes that depend on the loading order.
+**Key point**: `eager` is a build-time decision that changes the webpack chunk graph. It cannot be negotiated at runtime. Changing it during migration changes how chunks are structured and can break other producers that depend on the loading order.
 
 **Cross-bundler note**: `eager` has no meaning in Vite's dev server (native ESM). `@module-federation/vite` handles shared modules differently during `vite dev` vs production builds. The config is honoured in production.
 
 ### `singleton`
 
-| Host | Remote | Result |
+| Consumer | Producer | Result |
 |---|---|---|
 | `true` | `true` | Only one instance of the module exists at runtime. The shared scope picks the best version (usually highest semver match). **Required for React** — multiple instances break hooks and context. |
-| `true` | `false` | Host wants a singleton, remote doesn't care. The host's singleton wins and the remote uses it. Works fine. |
-| `false` | `true` | Remote wants a singleton but the host doesn't enforce it. The remote will still try to register as singleton, but the host may have already loaded its own non-singleton copy. **Can cause duplicate instances.** |
+| `true` | `false` | Consumer wants a singleton, producer doesn't care. The consumer's singleton wins and the producer uses it. Works fine. |
+| `false` | `true` | Producer wants a singleton but the consumer doesn't enforce it. The producer will still try to register as singleton, but the consumer may have already loaded its own non-singleton copy. **Can cause duplicate instances.** |
 | `false` | `false` | Each side loads its own copy. Fine for stateless utilities (lodash, date-fns). **Not safe for React, state managers, or anything with module-level state.** |
 
 ### `requiredVersion`
@@ -76,9 +78,9 @@ There are two valid migration orders. Which one you use depends on your shared m
 | `false` (default) | Version mismatches produce a console warning. The app continues running with the mismatched version. |
 | `true` | Version mismatches **throw a runtime error** and the app crashes. |
 
-**Migration risk**: If v1 remotes use `strictVersion: true` and the v2 host's shared scope resolution picks a different "winner" version than v1 did, those remotes crash at runtime with no graceful fallback. The v2 runtime has a slightly different resolution algorithm that usually picks the same version, but with complex dependency trees (many remotes providing different patch versions), the winner can change.
+**Migration risk**: If v1 producers use `strictVersion: true` and the v2 consumer's shared scope resolution picks a different "winner" version than v1 did, those producers crash at runtime with no graceful fallback. The v2 runtime has a slightly different resolution algorithm that usually picks the same version, but with complex dependency trees (many producers providing different patch versions), the winner can change.
 
-**Recommendation**: Avoid `strictVersion: true` during migration. If you must keep it, migrate those remotes to v2 first so both sides use the same resolution algorithm.
+**Recommendation**: Avoid `strictVersion: true` during migration. If you must keep it, migrate those producers to v2 first so both sides use the same resolution algorithm.
 
 ### `shareScope`
 
@@ -87,7 +89,7 @@ There are two valid migration orders. Which one you use depends on your shared m
 | Default (`'default'`) | All packages share a single scope. v2's backward-compatibility patching covers this. **Use this.** |
 | Custom name | Creates an isolated sharing scope. v2's patching only covers the `'default'` scope — custom scopes are not bridged between v1 and v2 runtimes. Shared modules resolve from an empty scope and fall back to bundled copies, causing duplicate instances for singletons. |
 
-**Migration risk**: If any remote uses a custom `shareScope`, the v2 host cannot negotiate shared modules with it. You must migrate that remote to v2 (so both sides use the same runtime) or move it back to the default scope before upgrading the host.
+**Migration risk**: If any producer uses a custom `shareScope`, the v2 consumer cannot negotiate shared modules with it. You must migrate that producer to v2 (so both sides use the same runtime) or move it back to the default scope before upgrading the consumer.
 
 ---
 
@@ -95,16 +97,16 @@ There are two valid migration orders. Which one you use depends on your shared m
 
 ### How v2 backward compatibility works
 
-`@module-federation/enhanced` patches webpack's sharing APIs (`__webpack_init_sharing__`, `__webpack_share_scopes__`) so that v1 remotes can register their shared modules into the v2 host's scope. The flow:
+`@module-federation/enhanced` patches webpack's sharing APIs (`__webpack_init_sharing__`, `__webpack_share_scopes__`) so that v1 producers can register their shared modules into the v2 consumer's scope. The flow:
 
 ```
-v2 host loads
+v2 consumer loads
   → initialises @module-federation/enhanced runtime
   → patches __webpack_share_scopes__['default']
-  → fetches v1 remote entry (standard remoteEntry.js)
-    → v1 remote calls __webpack_init_sharing__('default')
+  → fetches v1 producer's remote entry (standard remoteEntry.js)
+    → v1 producer calls __webpack_init_sharing__('default')
     → patched function bridges into v2 shared scope
-    → v1 remote registers its shared modules
+    → v1 producer registers its shared modules
   → v2 runtime negotiates versions across v1 + v2 providers
   → winner is used by all sides
 ```
@@ -115,10 +117,10 @@ This works transparently for the `'default'` scope with standard shared configs.
 
 | Scenario | Why it breaks | Workaround |
 |---|---|---|
-| v1 host + v2 remote (advanced features) | v1 host can load v2's `remoteEntry.js` (standard format), but v2 runtime features aren't initialised | Remotes-first migration (Path B) — basic functionality works, v2 features are deferred |
+| v1 consumer + v2 producer (advanced features) | v1 consumer can load v2's `remoteEntry.js` (standard format), but v2 runtime features aren't initialised | Producers-first migration (Path B) — basic functionality works, v2 features are deferred |
 | Custom `shareScope` names | v2 patching only covers `'default'` | Move all packages to `'default'` scope before migrating |
 | Manual `__webpack_init_sharing__` calls | Custom runtime code may bypass v2's patches | Audit and update custom bootstrap code |
-| `strictVersion: true` + different resolution winner | v2 resolution may pick a different version than v1 did | Remove `strictVersion` during migration or migrate affected remotes first |
+| `strictVersion: true` + different resolution winner | v2 resolution may pick a different version than v1 did | Remove `strictVersion` during migration or migrate affected producers first |
 | Side-effect-dependent load order | v2 may resolve shared modules in a different order | Remove side effects from shared modules, or use `eager: true` to make order deterministic |
 
 ---
@@ -137,7 +139,7 @@ const { ModuleFederationPlugin } = require('@module-federation/enhanced/webpack'
 const { ModuleFederationPlugin } = require('@module-federation/enhanced/rspack');
 ```
 
-Shared module configs (`eager`, `singleton`, `requiredVersion`) behave identically. A webpack remote and an rspack remote can coexist under the same host with no special configuration. Rspack uses `builtin:swc-loader` instead of `swc-loader` but this only affects build-time — the output format is the same.
+Shared module configs (`eager`, `singleton`, `requiredVersion`) behave identically. A webpack producer and an rspack producer can coexist under the same consumer with no special configuration. Rspack uses `builtin:swc-loader` instead of `swc-loader` but this only affects build-time — the output format is the same.
 
 ### Webpack/Rspack ↔ Vite
 
@@ -161,7 +163,7 @@ Shared module configs (`eager`, `singleton`, `requiredVersion`) behave identical
 
 ## The async bootstrap pattern
 
-Every MFE entry point must follow this pattern for shared modules to resolve correctly:
+Every producer entry point must follow this pattern for shared modules to resolve correctly:
 
 ```js
 // app.js (the actual entry point)
@@ -182,7 +184,7 @@ The dynamic `import()` creates an async chunk boundary. When webpack/rspack enco
 
 - `eager: false` shared modules are `undefined` at import time
 - `singleton` negotiation hasn't happened yet
-- The remote's `remoteEntry.js` hasn't registered its shared modules
+- The producer's `remoteEntry.js` hasn't registered its shared modules
 
 ### When you can skip it
 
@@ -217,12 +219,12 @@ Use `eager: true` for core framework deps (React, react-dom). Use `eager: false`
 1. **Do not change `eager` settings during migration** — it changes the chunk graph
 2. **Keep `requiredVersion` set** — it provides runtime safety during the transition
 3. **Remove `strictVersion: true`** temporarily — reintroduce after all packages are on v2
-4. **Move any custom `shareScope` to `'default'`** before upgrading the host
+4. **Move any custom `shareScope` to `'default'`** before upgrading the consumer
 5. **Audit shared deps for side effects** — v2 may resolve them in a different order
 
 ### For cross-bundler setups
 
-1. **Use `federation.config.js`** per package — a single source of truth consumed by webpack, rspack, and vite configs
+1. **Use `federation.config.js`** per producer — a single source of truth consumed by webpack, rspack, and vite configs
 2. **Always test with production builds** — dev server behavior differs across bundlers, especially Vite
 3. **Use semver version strings everywhere** — non-semver breaks cross-bundler negotiation
 4. **Pin `@module-federation/enhanced` to the same version** across all v2 packages — runtime version mismatches can cause subtle negotiation bugs
