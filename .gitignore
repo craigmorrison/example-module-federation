@@ -1,5 +1,6 @@
 # Compiled files
 dist
+build
 
 # Node.js
 node_modules
