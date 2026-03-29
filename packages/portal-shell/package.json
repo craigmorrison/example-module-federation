@@ -1,25 +1,21 @@
 {
   "name": "portal-shell",
   "version": "1.0.0",
-  "description": "Root application for the portal application",
+  "description": "Host application for the federated portal",
   "main": "index.js",
   "repository": "https://github.com/craigmorrison/example-webpack-module-federation.git",
   "author": "Craig Morrison",
   "license": "MIT",
   "private": true,
   "scripts": {
-    "start": "webpack-cli serve",
-    "build": "webpack --mode production",
-    "serve": "serve"
-  },
-  "devDependencies": {
-    "html-webpack-plugin": "^5.6.3"
+    "dev": "npm run dev:webpack",
+    "dev:webpack": "webpack-cli serve -c ./webpack.config.js",
+    "build": "npm run build:webpack",
+    "build:webpack": "webpack --mode production -c ./webpack.config.js"
   },
   "dependencies": {
-    "history": "^5.3.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "react-query": "^3.39.3",
-    "react-router-dom": "7.5.0"
+    "react-router-dom": "^7.5.0"
   }
 }

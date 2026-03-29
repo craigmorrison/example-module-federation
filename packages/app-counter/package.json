@@ -1,19 +1,17 @@
 {
   "name": "app-counter",
   "version": "1.0.0",
-  "description": "Sub-application that renders an incrementable counter",
+  "description": "Micro-frontend that renders an incrementable counter",
   "main": "index.js",
   "repository": "https://github.com/craigmorrison/example-webpack-module-federation.git",
   "author": "Craig Morrison",
   "license": "MIT",
   "private": true,
   "scripts": {
-    "start": "webpack-cli serve",
-    "build": "webpack --mode production",
-    "serve": "serve"
-  },
-  "devDependencies": {
-    "html-webpack-plugin": "^5.6.3"
+    "dev": "npm run dev:webpack",
+    "dev:webpack": "webpack-cli serve -c ./webpack.config.js",
+    "build": "npm run build:webpack",
+    "build:webpack": "webpack --mode production -c ./webpack.config.js"
   },
   "dependencies": {
     "react": "^19.1.0",

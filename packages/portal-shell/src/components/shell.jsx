@@ -1,10 +1,19 @@
 import Header from './header';
 import React from 'react';
-import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 
 const Table = React.lazy(() => import('table/Table'));
 const Counter = React.lazy(() => import('counter/Counter'));
 const People = React.lazy(() => import('people/People'));
+
+function Home() {
+  return (
+    <>
+      <h2>Home</h2>
+      <p>This is the home page.</p>
+    </>
+  );
+}
 
 function Shell() {
   return (
@@ -28,27 +37,14 @@ function Shell() {
         </nav>
       </Header>
 
-      <Switch>
-        <Route exact path="/">
-          <h2>Home</h2>
-          <p>This is the home page.</p>
-        </Route>
-        <Route path="/table">
-          <React.Suspense fallback="Loading">
-            <Table />
-          </React.Suspense>
-        </Route>
-        <Route path="/counter">
-          <React.Suspense fallback="Loading">
-            <Counter />
-          </React.Suspense>
-        </Route>
-        <Route path="/people">
-          <React.Suspense fallback="Loading">
-            <People />
-          </React.Suspense>
-        </Route>
-      </Switch>
+      <React.Suspense fallback="Loading">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/table" element={<Table />} />
+          <Route path="/counter" element={<Counter />} />
+          <Route path="/people" element={<People />} />
+        </Routes>
+      </React.Suspense>
     </Router>
   );
 }
