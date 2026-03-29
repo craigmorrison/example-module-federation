@@ -1,0 +1,24 @@
+{
+  "name": "portal-shell-ssr",
+  "version": "1.0.0",
+  "description": "SSR host application for the federated portal (React Router 7 framework mode)",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "react-router dev --port 3004",
+    "build": "react-router build",
+    "start": "react-router-serve ./build/server/index.js"
+  },
+  "dependencies": {
+    "@module-federation/runtime": "^2.3.0",
+    "@react-router/node": "^7.13.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-router": "^7.13.0"
+  },
+  "devDependencies": {
+    "@react-router/dev": "^7.13.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0"
+  }
+}
