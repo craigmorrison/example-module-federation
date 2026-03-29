@@ -1,21 +1,17 @@
 {
   "name": "app-table",
   "version": "1.0.0",
-  "description": "Micro-frontend that renders a table",
+  "description": "Micro-frontend that renders a table (MF v1, webpack-only)",
   "main": "index.js",
   "repository": "https://github.com/craigmorrison/example-webpack-module-federation.git",
   "author": "Craig Morrison",
   "license": "MIT",
   "private": true,
   "scripts": {
-    "dev": "npm run dev:webpack",
+    "dev": "webpack-cli serve -c ./webpack.config.js",
     "dev:webpack": "webpack-cli serve -c ./webpack.config.js",
-    "build": "npm run build:webpack",
-    "build:webpack": "webpack --mode production -c ./webpack.config.js",
-    "dev:rspack": "rspack serve -c ./rspack.config.js",
-    "build:rspack": "rspack build -c ./rspack.config.js",
-    "dev:vite": "vite -c ./vite.config.js",
-    "build:vite": "vite build -c ./vite.config.js"
+    "build": "webpack --mode production -c ./webpack.config.js",
+    "build:webpack": "webpack --mode production -c ./webpack.config.js"
   },
   "dependencies": {
     "react": "^19.1.0",

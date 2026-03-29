@@ -1,7 +1,7 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const { ModuleFederationPlugin } = require('@module-federation/enhanced/webpack');
-const federationConfig = require('./federation.config');
+const { ModuleFederationPlugin } = require('webpack').container;
+const deps = require('./package.json').dependencies;
 
 module.exports = {
   entry: './src/app.js',
@@ -41,6 +41,16 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({ template: './static/index.html' }),
-    new ModuleFederationPlugin(federationConfig)
+    new ModuleFederationPlugin({
+      name: 'counter',
+      filename: 'counter-remote-entry.js',
+      exposes: {
+        './Counter': './src/components/counter.jsx'
+      },
+      shared: {
+        react: { eager: true, singleton: true, requiredVersion: deps.react },
+        'react-dom': { eager: true, singleton: true, requiredVersion: deps['react-dom'] }
+      }
+    })
   ]
 };
