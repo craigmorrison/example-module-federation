@@ -1,8 +1,8 @@
 const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const { ModuleFederationPlugin } = require('@module-federation/enhanced/webpack');
+const { ModuleFederationPlugin } = require('@module-federation/enhanced/rspack');
 const federationConfig = require('./federation.config');
 
+/** @type {import('@rspack/core').Configuration} */
 module.exports = {
   entry: './src/app.js',
   mode: 'development',
@@ -20,7 +20,7 @@ module.exports = {
         test: /\.m?jsx?$/,
         exclude: /node_modules/,
         use: {
-          loader: 'swc-loader',
+          loader: 'builtin:swc-loader',
           options: {
             jsc: {
               parser: { syntax: 'ecmascript', jsx: true },
@@ -40,7 +40,9 @@ module.exports = {
     clean: true
   },
   plugins: [
-    new HtmlWebpackPlugin({ template: './static/index.html' }),
+    new (require('@rspack/core')).HtmlRspackPlugin({
+      template: './static/index.html'
+    }),
     new ModuleFederationPlugin(federationConfig)
   ]
 };

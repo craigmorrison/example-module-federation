@@ -7,16 +7,11 @@ module.exports = {
   entry: './src/app.js',
   mode: 'development',
   devServer: {
-    contentBase: path.join(__dirname, 'dist'),
+    static: path.join(__dirname, 'dist'),
     port: 3002,
     historyApiFallback: true,
-    hot: false,
-    hotOnly: false,
     headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
-      'Access-Control-Allow-Headers':
-        'X-Requested-With, content-type, Authorization'
+      'Access-Control-Allow-Origin': '*'
     }
   },
   module: {
@@ -25,9 +20,12 @@ module.exports = {
         test: /\.m?jsx?$/,
         exclude: /node_modules/,
         use: {
-          loader: 'babel-loader',
+          loader: 'swc-loader',
           options: {
-            rootMode: 'upward'
+            jsc: {
+              parser: { syntax: 'ecmascript', jsx: true },
+              transform: { react: { runtime: 'automatic' } }
+            }
           }
         }
       }
@@ -38,33 +36,21 @@ module.exports = {
   },
   output: {
     filename: 'counter.js',
-    path: path.resolve(__dirname, 'dist')
+    path: path.resolve(__dirname, 'dist'),
+    clean: true
   },
   plugins: [
-    new HtmlWebpackPlugin({
-      template: './static/index.html'
-    }),
+    new HtmlWebpackPlugin({ template: './static/index.html' }),
     new ModuleFederationPlugin({
       name: 'counter',
       filename: 'counter-remote-entry.js',
       exposes: {
         './Counter': './src/components/counter.jsx'
       },
-      shared: [
-        {
-          ...deps,
-          react: {
-            eager: true,
-            singleton: true,
-            requiredVersion: deps.react
-          },
-          'react-dom': {
-            eager: true,
-            singleton: true,
-            requiredVersion: deps['react-dom']
-          }
-        }
-      ]
+      shared: {
+        react: { eager: true, singleton: true, requiredVersion: deps.react },
+        'react-dom': { eager: true, singleton: true, requiredVersion: deps['react-dom'] }
+      }
     })
   ]
 };

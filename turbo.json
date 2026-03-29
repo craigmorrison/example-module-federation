@@ -1,0 +1,38 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "dev": {
+      "persistent": true,
+      "cache": false
+    },
+    "dev:webpack": {
+      "persistent": true,
+      "cache": false
+    },
+    "dev:rspack": {
+      "persistent": true,
+      "cache": false
+    },
+    "dev:vite": {
+      "persistent": true,
+      "cache": false
+    },
+    "build": {
+      "outputs": ["dist/**"]
+    },
+    "build:webpack": {
+      "outputs": ["dist/**"]
+    },
+    "build:rspack": {
+      "outputs": ["dist/**"]
+    },
+    "build:vite": {
+      "outputs": ["dist/**"]
+    },
+    "test": {
+      "cache": false
+    },
+    "lint": {},
+    "format": {}
+  }
+}
