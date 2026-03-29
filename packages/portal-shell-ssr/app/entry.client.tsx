@@ -8,7 +8,7 @@ init({
   remotes: [
     { name: 'table', entry: 'http://localhost:3001/table-remote-entry.js' },
     { name: 'counter', entry: 'http://localhost:3002/counter-remote-entry.js' },
-    { name: 'people', entry: 'http://localhost:3003/people-remote-entry.js' }
+    { name: 'people', entry: 'http://localhost:3003/mf-manifest.json' }
   ],
   shared: {
     react: { version: '19', scope: 'default', lib: () => require('react'), shareConfig: { singleton: true, eager: true } },

@@ -48,7 +48,7 @@ module.exports = {
       remotes: {
         table: 'table@http://localhost:3001/table-remote-entry.js',
         counter: 'counter@http://localhost:3002/counter-remote-entry.js',
-        people: 'people@http://localhost:3003/people-remote-entry.js'
+        people: 'people@http://localhost:3003/mf-manifest.json'
       },
       shared: {
         react: { eager: true, singleton: true, requiredVersion: deps.react },

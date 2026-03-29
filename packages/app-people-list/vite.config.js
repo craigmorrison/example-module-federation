@@ -10,12 +10,14 @@ export default defineConfig({
     federation({
       ...federationConfig,
       remotes: {},
-      manifest: false
+      manifest: true
     })
   ],
   server: {
     port: 3003,
-    cors: true
+    strictPort: true,
+    cors: true,
+    origin: 'http://localhost:3003'
   },
   build: {
     target: 'esnext',
