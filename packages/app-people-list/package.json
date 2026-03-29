@@ -13,7 +13,7 @@
     "build:rspack": "tsc && rspack build -c ./rspack.config.js",
     "dev:vite": "vite -c ./vite.config.js",
     "build:vite": "tsc && vite build -c ./vite.config.js",
-    "test": "echo \"no tests yet\"",
+    "test": "vitest run",
     "lint": "oxlint --fix .",
     "format": "oxfmt ."
   },
