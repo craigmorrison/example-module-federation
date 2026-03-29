@@ -11,8 +11,9 @@
   ],
   "private": true,
   "scripts": {
-    "dev": "turbo run dev",
-    "dev:webpack": "turbo run dev:webpack",
+    "dev": "turbo run dev --filter=!portal-shell-ssr",
+    "dev:ssr": "turbo run dev:webpack --filter=app-counter --filter=app-table --filter=app-people-list & turbo run dev --filter=portal-shell-ssr",
+    "dev:webpack": "turbo run dev:webpack --filter=!portal-shell-ssr",
     "dev:rspack": "turbo run dev:webpack --filter=app-counter --filter=app-table & turbo run dev:rspack --filter=portal-shell --filter=app-people-list",
     "dev:vite": "turbo run dev:webpack --filter=app-counter --filter=app-table & turbo run dev:vite --filter=portal-shell --filter=app-people-list",
     "build": "turbo run build",
