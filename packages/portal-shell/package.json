@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Host application for the federated portal",
   "main": "index.js",
-  "repository": "https://github.com/craigmorrison/example-webpack-module-federation.git",
+  "repository": "https://github.com/craigmorrison/example-module-federation.git",
   "author": "Craig Morrison",
   "license": "MIT",
   "private": true,

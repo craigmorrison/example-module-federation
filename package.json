@@ -1,8 +1,8 @@
 {
-  "name": "example-webpack-module-federation",
+  "name": "example-module-federation",
   "version": "1.0.0",
   "description": "Cross-bundler Module Federation proof of concept (Webpack, Rspack, Vite)",
-  "repository": "https://github.com/craigmorrison/example-webpack-module-federation.git",
+  "repository": "https://github.com/craigmorrison/example-module-federation.git",
   "author": "Craig Morrison",
   "license": "MIT",
   "packageManager": "npm@11.11.0",

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Micro-frontend that renders an incrementable counter (MF v1, webpack-only)",
   "main": "index.js",
-  "repository": "https://github.com/craigmorrison/example-webpack-module-federation.git",
+  "repository": "https://github.com/craigmorrison/example-module-federation.git",
   "author": "Craig Morrison",
   "license": "MIT",
   "private": true,
