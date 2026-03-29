@@ -5,10 +5,8 @@
   "description": "Producer that renders a people list from SWAPI (MF v2, vite)",
   "main": "src/index.tsx",
   "scripts": {
-    "dev": "vite -c ./vite.config.js",
-    "dev:vite": "vite -c ./vite.config.js",
+    "dev": "tsc && vite build -c ./vite.config.js && vite preview -c ./vite.config.js --port 3003 --strictPort",
     "build": "tsc && vite build -c ./vite.config.js",
-    "build:vite": "tsc && vite build -c ./vite.config.js",
     "test": "vitest run",
     "lint": "oxlint --fix .",
     "format": "oxfmt ."

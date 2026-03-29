@@ -19,6 +19,11 @@ export default defineConfig({
     cors: true,
     origin: 'http://localhost:3003'
   },
+  preview: {
+    port: 3003,
+    strictPort: true,
+    cors: true
+  },
   build: {
     target: 'esnext',
     outDir: 'dist'
