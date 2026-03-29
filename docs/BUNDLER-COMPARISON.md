@@ -89,6 +89,27 @@ Native webpack Module Federation (v1) is the most battle-tested option. The `@mo
 
 Webpack producers work with every consumer in both dev and production. If you're migrating an existing MFE ecosystem, keeping producers on webpack until you've validated the consumer upgrade is the lowest-risk approach.
 
+## SSR consumer limitations
+
+The SSR consumer (`portal-shell-ssr`) uses React Router 7 framework mode with `@module-federation/runtime` for client-side remote loading. In dev mode, this hits the same cross-bundler compatibility wall:
+
+| Producer bundler | SSR consumer (dev) | Error |
+|---|---|---|
+| webpack (counter) | Duplicate React instances | `useState` throws — two React copies, shared scope not negotiated |
+| rspack (table) | Rspack internals not resolved | `can't access '__rspack_default_export' before initialization` |
+| vite (people) | CJS/ESM mismatch | `require is not defined` — federation.config.js uses CJS |
+
+**Root cause**: The `@module-federation/runtime` `loadRemote()` in a Vite dev context doesn't negotiate shared modules with webpack/rspack producers. The producers' remote entries expect a webpack-like `__webpack_share_scopes__` runtime that doesn't exist in Vite's ESM environment.
+
+**The SSR shell architecture is sound** — the server-rendered shell chrome works, client-only Suspense islands work, splat catch-all routes work. The gap is in the MF runtime's ability to bridge shared scopes across bundler formats in dev mode.
+
+**In production** (all packages built), the formats align and cross-bundler federation works. The dev mode limitation applies to both the SPA consumer (worked around with `vite build + preview`) and the SSR consumer (not yet worked around).
+
+A production-ready SSR consumer would need either:
+- All producers to output webpack-compatible UMD remote entries (which rspack does natively, but vite doesn't in dev)
+- A `build + serve` workflow for all producers (losing HMR everywhere)
+- All producers and the consumer on the same bundler
+
 ## Recommendation for migration
 
 1. **Start with webpack everywhere** (current state for most orgs)
