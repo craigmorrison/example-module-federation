@@ -1,0 +1,1 @@
+import{w as t,p as e}from"./chunk-UVKPFVEO-Ds2eo5un.js";import{F as o}from"./federated-remote-BeZNZybJ.js";import"./index-DOezi9KW.js";const p=t(function(){return e.jsx(o,{remote:"table/Table"})});export{p as default};

@@ -1,0 +1,1 @@
+import{w as e,p as o}from"./chunk-UVKPFVEO-Ds2eo5un.js";import{F as t}from"./federated-remote-BeZNZybJ.js";import"./index-DOezi9KW.js";const n=e(function(){return o.jsx(t,{remote:"people/People"})});export{n as default};

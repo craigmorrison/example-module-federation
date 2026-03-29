@@ -1,0 +1,1 @@
+import{w as t,p as o}from"./chunk-UVKPFVEO-Ds2eo5un.js";import{F as e}from"./federated-remote-BeZNZybJ.js";import"./index-DOezi9KW.js";const u=t(function(){return o.jsx(e,{remote:"counter/Counter"})});export{u as default};
