@@ -1,17 +1,15 @@
 {
   "name": "portal-shell",
   "version": "1.0.0",
-  "description": "Consumer application for the federated portal (webpack-only)",
+  "description": "Consumer application for the federated portal (rspack, MF v1.5)",
   "main": "index.js",
   "repository": "https://github.com/craigmorrison/example-module-federation.git",
   "author": "Craig Morrison",
   "license": "MIT",
   "private": true,
   "scripts": {
-    "dev": "webpack-cli serve -c ./webpack.config.js",
-    "dev:webpack": "webpack-cli serve -c ./webpack.config.js",
-    "build": "webpack --mode production -c ./webpack.config.js",
-    "build:webpack": "webpack --mode production -c ./webpack.config.js"
+    "dev": "rspack serve -c ./rspack.config.js",
+    "build": "rspack build -c ./rspack.config.js"
   },
   "dependencies": {
     "react": "^19.1.0",

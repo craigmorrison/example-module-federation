@@ -125,11 +125,80 @@ This works transparently for the `'default'` scope with standard shared configs.
 
 ---
 
+## Rspack v1.5: the practical middle ground
+
+Rspack has a **built-in** Module Federation implementation (v1.5) that is fully compatible with webpack's native MF v1:
+
+```js
+// Rspack native v1.5 — same API as webpack's native MF
+const { ModuleFederationPlugin } = require('@rspack/core').container;
+
+// vs. @module-federation/enhanced v2 — different runtime
+const { ModuleFederationPlugin } = require('@module-federation/enhanced/rspack');
+```
+
+### v1.5 vs v2 on rspack
+
+| | Rspack native v1.5 | @module-federation/enhanced v2 |
+|---|---|---|
+| **v1 producer compat** | Full — same protocol as webpack v1 | Supposed to work, but manifest resolution can fail with v1 producers |
+| **v2 producer compat** | Can load `remoteEntry.js` but no manifest support | Full — manifest, type hints, devtools |
+| **Remote entry format** | UMD (classic script) | UMD + optional `mf-manifest.json` |
+| **Shared scope** | `__webpack_share_scopes__` (same as webpack) | Patched version with v2 runtime SDK |
+| **Build speed** | 10-20x faster than webpack | Same (rspack under the hood) |
+
+### The manifest incompatibility
+
+`@module-federation/enhanced` on rspack produces `mf-manifest.json` files by default. When the consumer is also on v2, this works. But when v1 producers don't generate manifests, the v2 consumer's runtime may fail to fall back gracefully — it expects a manifest and gets a 404 or an HTML page.
+
+In practice, rspack's native v1.5 (`@rspack/core.container`) behaves identically to webpack's native MF v1, making it the safest choice for consumers that need to talk to v1 producers. It's webpack's MF protocol with rspack's build speed.
+
+### Mixed v1/v2 loading pattern
+
+For ecosystems with both v1 and v2 producers, the consumer needs to load them differently:
+
+- **v1 producers**: Load via static `remotes` config (classic `<script>` tag injection)
+- **v2 producers**: Load via `@module-federation/runtime` `loadRemote()` (manifest-aware)
+
+This requires a metadata layer that tells the consumer which protocol each producer uses. The consumer would use rspack's native v1.5 for the static remotes, and initialise the v2 runtime separately for manifest-based producers:
+
+```js
+// rspack.config.js — static v1 remotes
+new ModuleFederationPlugin({
+  name: 'shell',
+  remotes: {
+    // v1 producers loaded as classic scripts
+    counter: 'counter@http://localhost:3002/counter-remote-entry.js'
+  },
+  shared: { react: { singleton: true, eager: true } }
+});
+
+// entry.js — dynamic v2 remotes loaded at runtime
+import { init, loadRemote } from '@module-federation/runtime';
+
+init({
+  name: 'shell',
+  remotes: [
+    // v2 producers loaded via manifest
+    { name: 'table', entry: 'http://localhost:3001/mf-manifest.json' }
+  ]
+});
+
+// Later, in a route handler:
+const Table = React.lazy(() => loadRemote('table/Table'));
+```
+
+This pattern allows incremental migration — producers upgrade to v2 at their own pace, and the consumer's metadata layer routes to the right loading mechanism.
+
+---
+
 ## Cross-bundler shared module behavior
 
 ### Webpack ↔ Rspack
 
-Rspack's Module Federation is highly compatible with webpack's. Both use the same shared scope negotiation protocol. `@module-federation/enhanced` provides unified plugins for both:
+Rspack's native MF v1.5 is fully compatible with webpack's native MF v1. Both use the same `__webpack_share_scopes__` protocol and produce identical UMD remote entries. A webpack producer and an rspack producer can coexist under the same consumer with no special configuration.
+
+When using `@module-federation/enhanced` (v2), the same applies — the enhanced plugins for both bundlers produce compatible output:
 
 ```js
 // webpack
@@ -139,7 +208,7 @@ const { ModuleFederationPlugin } = require('@module-federation/enhanced/webpack'
 const { ModuleFederationPlugin } = require('@module-federation/enhanced/rspack');
 ```
 
-Shared module configs (`eager`, `singleton`, `requiredVersion`) behave identically. A webpack producer and an rspack producer can coexist under the same consumer with no special configuration. Rspack uses `builtin:swc-loader` instead of `swc-loader` but this only affects build-time — the output format is the same.
+Rspack uses `builtin:swc-loader` instead of `swc-loader` but this only affects build-time — the output format is the same.
 
 ### Webpack/Rspack ↔ Vite
 

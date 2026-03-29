@@ -110,9 +110,28 @@ A production-ready SSR consumer would need either:
 - A `build + serve` workflow for all producers (losing HMR everywhere)
 - All producers and the consumer on the same bundler
 
+## Consumer bundler choice
+
+The consumer (shell) has stricter requirements than producers because it controls the shared scope runtime.
+
+| Consumer bundler | v1 producers | v2 producers | SSR support |
+|---|---|---|---|
+| **webpack** (native MF v1) | Full compat | Can load `remoteEntry.js` but no manifest features | Custom Express SSR with `@module-federation/node` |
+| **rspack** (native v1.5) | Full compat (same protocol as webpack) | Can load `remoteEntry.js` but no manifest features | Custom SSR possible |
+| **rspack** (`@module-federation/enhanced`) | Manifest resolution can fail with v1 producers | Full compat | Custom SSR possible |
+| **vite** | **Broken in dev** — can't negotiate `__webpack_share_scopes__` | Works in production only | React Router 7 framework mode (SSR shell works, MFE loading broken in dev) |
+| **Next.js** (webpack mode) | Via `@module-federation/nextjs-mf` | Via `@module-federation/nextjs-mf` | Built-in SSR |
+| **Next.js** (Turbopack) | **No MF support** | **No MF support** | N/A |
+
+**Key finding**: Vite cannot be used as a consumer if any producers use webpack or rspack. The shared scope protocol (`__webpack_share_scopes__`) is not implemented in Vite's runtime. This applies to both SPA and SSR consumers.
+
+**Recommended consumer bundler**: rspack with native v1.5 (`@rspack/core.container.ModuleFederationPlugin`). It gives you webpack v1 compatibility with rspack's build speed. Upgrade to `@module-federation/enhanced` only after all producers are also on v2.
+
 ## Recommendation for migration
 
 1. **Start with webpack everywhere** (current state for most orgs)
-2. **Upgrade the consumer to MF v2** (`@module-federation/enhanced`)
-3. **Migrate producers to rspack first** — minimal config changes, massive build speed improvement, no dev mode issues
-4. **Migrate to vite last** (if at all) — only when you're comfortable with the build+preview dev workflow, or when your consumer is also on vite
+2. **Migrate the consumer to rspack native v1.5** — same MF protocol, 10-20x faster builds, no producer changes needed
+3. **Migrate producers to rspack** — minimal config changes, massive build speed improvement, no dev mode issues
+4. **Upgrade consumer + producers to MF v2** (`@module-federation/enhanced`) once all producers are migrated — unlocks manifests, type hints, devtools
+5. **Migrate producers to vite last** (if at all) — only when comfortable with build+preview dev workflow. Consumer stays on rspack.
+6. **SSR**: Use Next.js (webpack mode) with `@module-federation/nextjs-mf`, or custom rspack SSR. Avoid Vite-based SSR frameworks for federation consumers.

@@ -7,8 +7,8 @@ A proof of concept showing Module Federation working across **Webpack**, **Rspac
 ```
                          ┌──────────────────┐
                          │   portal-shell   │
-                         │  MF v2 consumer  │
-                         │     webpack      │
+                         │ MF v1.5 consumer │
+                         │     rspack       │
                          │   :3000          │
                          └────────┬─────────┘
                                   │
@@ -24,8 +24,9 @@ A proof of concept showing Module Federation working across **Webpack**, **Rspac
    └─────────────────┘ └─────────────────┘ └──────────────────┘
 
               ┌──────────────────┐
-              │ portal-shell-ssr │  (alternative consumer)
-              │  MF v2 consumer  │
+              ┌──────────────────┐
+              │ portal-shell-ssr │  (experimental — MFE loading
+              │  MF v2 consumer  │   broken in dev, see docs)
               │  SSR via RR7     │
               │  :4000           │
               └──────────────────┘
@@ -33,17 +34,17 @@ A proof of concept showing Module Federation working across **Webpack**, **Rspac
 
 Three producers, three different bundlers, one consumer that fetches `remoteEntry.js` over HTTP regardless of how it was built. This demonstrates:
 
-1. **Cross-bundler federation** — webpack, rspack, and vite producers all consumed by the same consumer
-2. **v1/v2 coexistence** — `app-counter` is still on native webpack MF v1, the consumer handles both
-3. **SSR option** — `portal-shell-ssr` is an alternative consumer using React Router 7 with server-side rendering
+1. **Cross-bundler federation** — webpack, rspack, and vite producers all consumed by an rspack consumer using native MF v1.5
+2. **v1/v2 coexistence** — `app-counter` is still on native webpack MF v1, the consumer handles both v1 and v2 producers
+3. **SSR prototype** — `portal-shell-ssr` demonstrates the architecture (SSR shell chrome + client-only MFE islands) but MFE loading is broken in dev due to Vite's lack of `__webpack_share_scopes__` support
 
 ## Stack
 
 | Tool | Purpose |
 |---|---|
 | [Module Federation v2](https://module-federation.io/) | Micro-frontend runtime (cross-bundler) |
-| [Webpack 5](https://webpack.js.org/) | Consumer + legacy producer bundler |
-| [Rspack](https://rspack.rs/) | Producer bundler (app-table) |
+| [Rspack](https://rspack.rs/) | Consumer bundler + producer (app-table) |
+| [Webpack 5](https://webpack.js.org/) | Legacy producer bundler (app-counter) |
 | [Vite 8](https://vite.dev/) | Producer bundler (app-people-list) + SSR consumer |
 | [SWC](https://swc.rs/) | Transpiler (replaces Babel) |
 | [React 19](https://react.dev/) | UI framework |
@@ -66,18 +67,18 @@ npm install
 ## Running
 
 ```shell
-npm run dev
+npm run dev           # SPA consumer (:3000) + all producers
+npm run dev:ssr       # SSR consumer (:4000) + all producers (experimental)
 ```
 
-This starts everything:
+`dev` starts:
 
-- **http://localhost:3000** — SPA consumer (webpack)
-- **http://localhost:4000** — SSR consumer (React Router 7)
+- **http://localhost:3000** — SPA consumer (rspack, MF v1.5)
 - `:3001` — app-table (rspack producer)
 - `:3002` — app-counter (webpack producer)
-- `:3003` — app-people-list (vite producer)
+- `:3003` — app-people-list (vite producer, build+preview)
 
-Navigate to `/table`, `/counter`, `/people` on either consumer.
+Navigate to `/table`, `/counter`, `/people`.
 
 ## Building
 

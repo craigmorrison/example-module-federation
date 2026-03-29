@@ -1,8 +1,8 @@
 const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const { ModuleFederationPlugin } = require('@module-federation/enhanced/webpack');
-const deps = require('./package.json').dependencies;
+const rspack = require('@rspack/core');
+const federationDeps = require('./package.json').dependencies;
 
+/** @type {import('@rspack/core').Configuration} */
 module.exports = {
   entry: './src/app.js',
   mode: 'development',
@@ -20,7 +20,7 @@ module.exports = {
         test: /\.m?jsx?$/,
         exclude: /node_modules/,
         use: {
-          loader: 'swc-loader',
+          loader: 'builtin:swc-loader',
           options: {
             jsc: {
               parser: { syntax: 'ecmascript', jsx: true },
@@ -41,18 +41,18 @@ module.exports = {
     clean: true
   },
   plugins: [
-    new HtmlWebpackPlugin({ template: './static/index.html' }),
-    new ModuleFederationPlugin({
+    new rspack.HtmlRspackPlugin({ template: './static/index.html' }),
+    new rspack.container.ModuleFederationPlugin({
       name: 'shell',
       filename: 'remoteEntry.js',
       remotes: {
         table: 'table@http://localhost:3001/table-remote-entry.js',
         counter: 'counter@http://localhost:3002/counter-remote-entry.js',
-        people: 'people@http://localhost:3003/mf-manifest.json'
+        people: 'people@http://localhost:3003/people-remote-entry.js'
       },
       shared: {
-        react: { eager: true, singleton: true, requiredVersion: deps.react },
-        'react-dom': { eager: true, singleton: true, requiredVersion: deps['react-dom'] }
+        react: { eager: true, singleton: true, requiredVersion: federationDeps.react },
+        'react-dom': { eager: true, singleton: true, requiredVersion: federationDeps['react-dom'] }
       }
     })
   ]

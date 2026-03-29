@@ -11,7 +11,8 @@
   ],
   "private": true,
   "scripts": {
-    "dev": "turbo run dev",
+    "dev": "turbo run dev --filter=!portal-shell-ssr",
+    "dev:ssr": "turbo run dev --filter=!portal-shell & turbo run dev --filter=portal-shell-ssr",
     "build": "turbo run build",
     "test": "vitest run",
     "test:watch": "vitest",
