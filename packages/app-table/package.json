@@ -11,7 +11,9 @@
     "dev": "npm run dev:webpack",
     "dev:webpack": "webpack-cli serve -c ./webpack.config.js",
     "build": "npm run build:webpack",
-    "build:webpack": "webpack --mode production -c ./webpack.config.js"
+    "build:webpack": "webpack --mode production -c ./webpack.config.js",
+    "dev:rspack": "rspack serve -c ./rspack.config.js",
+    "build:rspack": "rspack build -c ./rspack.config.js"
   },
   "dependencies": {
     "react": "^19.1.0",

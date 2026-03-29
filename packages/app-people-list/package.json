@@ -9,6 +9,8 @@
     "dev:webpack": "webpack serve -c ./webpack.config.js",
     "build": "npm run build:webpack",
     "build:webpack": "tsc && webpack --mode production -c ./webpack.config.js",
+    "dev:rspack": "rspack serve -c ./rspack.config.js",
+    "build:rspack": "tsc && rspack build -c ./rspack.config.js",
     "test": "echo \"no tests yet\"",
     "lint": "oxlint --fix .",
     "format": "oxfmt ."
