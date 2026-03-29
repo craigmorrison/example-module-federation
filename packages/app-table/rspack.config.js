@@ -1,8 +1,8 @@
 const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const { ModuleFederationPlugin } = require('webpack').container;
-const deps = require('./package.json').dependencies;
+const { ModuleFederationPlugin } = require('@module-federation/enhanced/rspack');
+const federationConfig = require('./federation.config');
 
+/** @type {import('@rspack/core').Configuration} */
 module.exports = {
   entry: './src/app.js',
   mode: 'development',
@@ -20,7 +20,7 @@ module.exports = {
         test: /\.m?jsx?$/,
         exclude: /node_modules/,
         use: {
-          loader: 'swc-loader',
+          loader: 'builtin:swc-loader',
           options: {
             jsc: {
               parser: { syntax: 'ecmascript', jsx: true },
@@ -40,17 +40,9 @@ module.exports = {
     clean: true
   },
   plugins: [
-    new HtmlWebpackPlugin({ template: './static/index.html' }),
-    new ModuleFederationPlugin({
-      name: 'table',
-      filename: 'table-remote-entry.js',
-      exposes: {
-        './Table': './src/components/table.jsx'
-      },
-      shared: {
-        react: { eager: true, singleton: true, requiredVersion: deps.react },
-        'react-dom': { eager: true, singleton: true, requiredVersion: deps['react-dom'] }
-      }
-    })
+    new (require('@rspack/core')).HtmlRspackPlugin({
+      template: './static/index.html'
+    }),
+    new ModuleFederationPlugin(federationConfig)
   ]
 };
