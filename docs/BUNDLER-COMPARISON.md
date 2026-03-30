@@ -65,6 +65,23 @@ This builds the production bundle (which outputs standard JS) and serves it via 
 - **Rspack consumer + Vite producer (dev)**: Same issue
 - **SSR consumer + Vite producer (dev)**: The MF runtime uses `loadRemote()` which may handle ESM, but Vite's HMR preamble still causes issues
 
+## Rolldown native MF: the future fix (not yet available)
+
+Rolldown (Vite 8's underlying Rust bundler) has **native Module Federation merged into its git main branch** (March 2025, announced by Evan You). This is not a plugin — it's built-in MF at the bundler level, implementing webpack-compatible `__webpack_share_scopes__` semantics.
+
+When this lands in a published Rolldown release, it should fix the cross-bundler dev mode issues because:
+- Vite producers would speak the same shared scope protocol as webpack/rspack
+- No need for `@module-federation/vite` plugin (which is the broken layer)
+- Dev mode and production would use the same MF implementation
+
+**Current status** (as of March 2026):
+- Vite 8.0.3 ships with `rolldown@1.0.0-rc.12` — **native MF is NOT in this release**
+- `@module-federation/vite` (the plugin) is still the only option for Vite MF
+- The Rolldown example repo (`rolldown/rolldown-vite-module-federation-example`) has open issues — the implementation is still rough
+- No `moduleFederationPlugin` export exists in any published `rolldown` package
+
+**When to revisit**: Watch for Rolldown 1.0 stable release and check if `moduleFederationPlugin` appears in the exports. When it does, replace `@module-federation/vite` with the native plugin and retest cross-bundler dev mode.
+
 ## Rspack: the easy migration from webpack
 
 Rspack configs are nearly identical to webpack. The main differences:
