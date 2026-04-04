@@ -23,6 +23,9 @@
     "*.{js,jsx,ts,tsx}": "oxlint --fix",
     "*.{js,jsx,ts,tsx,css,md,json}": "oxfmt"
   },
+  "overrides": {
+    "defu": ">=6.1.5"
+  },
   "devDependencies": {
     "@module-federation/enhanced": "^2.3.0",
     "@swc/core": "^1.15.0",
