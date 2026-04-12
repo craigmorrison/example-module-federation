@@ -1,0 +1,202 @@
+version: 2
+
+# Each npm entry shares the same shape (groups, cooldown, labels, etc.).
+# GitHub's dependabot parser rejects YAML aliases, so the shape has to be
+# repeated per entry.
+
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: friday
+      time: "12:00"
+      timezone: Europe/London
+    open-pull-requests-limit: 3
+    labels:
+      - maintenance
+    cooldown:
+      default-days: 5
+      semver-major-days: 14
+    commit-message:
+      prefix: chore
+      prefix-development: chore
+      include: scope
+    groups:
+      production-minor-and-patch:
+        dependency-type: production
+        update-types:
+          - patch
+          - minor
+      dev-minor-and-patch:
+        dependency-type: development
+        update-types:
+          - patch
+          - minor
+
+  - package-ecosystem: npm
+    directory: /packages/app-counter
+    schedule:
+      interval: weekly
+      day: friday
+      time: "12:00"
+      timezone: Europe/London
+    open-pull-requests-limit: 3
+    labels:
+      - maintenance
+    cooldown:
+      default-days: 5
+      semver-major-days: 14
+    commit-message:
+      prefix: chore
+      prefix-development: chore
+      include: scope
+    groups:
+      production-minor-and-patch:
+        dependency-type: production
+        update-types:
+          - patch
+          - minor
+      dev-minor-and-patch:
+        dependency-type: development
+        update-types:
+          - patch
+          - minor
+
+  - package-ecosystem: npm
+    directory: /packages/app-people-list
+    schedule:
+      interval: weekly
+      day: friday
+      time: "12:00"
+      timezone: Europe/London
+    open-pull-requests-limit: 3
+    labels:
+      - maintenance
+    cooldown:
+      default-days: 5
+      semver-major-days: 14
+    commit-message:
+      prefix: chore
+      prefix-development: chore
+      include: scope
+    groups:
+      production-minor-and-patch:
+        dependency-type: production
+        update-types:
+          - patch
+          - minor
+      dev-minor-and-patch:
+        dependency-type: development
+        update-types:
+          - patch
+          - minor
+
+  - package-ecosystem: npm
+    directory: /packages/app-table
+    schedule:
+      interval: weekly
+      day: friday
+      time: "12:00"
+      timezone: Europe/London
+    open-pull-requests-limit: 3
+    labels:
+      - maintenance
+    cooldown:
+      default-days: 5
+      semver-major-days: 14
+    commit-message:
+      prefix: chore
+      prefix-development: chore
+      include: scope
+    groups:
+      production-minor-and-patch:
+        dependency-type: production
+        update-types:
+          - patch
+          - minor
+      dev-minor-and-patch:
+        dependency-type: development
+        update-types:
+          - patch
+          - minor
+
+  - package-ecosystem: npm
+    directory: /packages/portal-shell
+    schedule:
+      interval: weekly
+      day: friday
+      time: "12:00"
+      timezone: Europe/London
+    open-pull-requests-limit: 3
+    labels:
+      - maintenance
+    cooldown:
+      default-days: 5
+      semver-major-days: 14
+    commit-message:
+      prefix: chore
+      prefix-development: chore
+      include: scope
+    groups:
+      production-minor-and-patch:
+        dependency-type: production
+        update-types:
+          - patch
+          - minor
+      dev-minor-and-patch:
+        dependency-type: development
+        update-types:
+          - patch
+          - minor
+
+  - package-ecosystem: npm
+    directory: /packages/portal-shell-ssr
+    schedule:
+      interval: weekly
+      day: friday
+      time: "12:00"
+      timezone: Europe/London
+    open-pull-requests-limit: 3
+    labels:
+      - maintenance
+    cooldown:
+      default-days: 5
+      semver-major-days: 14
+    commit-message:
+      prefix: chore
+      prefix-development: chore
+      include: scope
+    groups:
+      production-minor-and-patch:
+        dependency-type: production
+        update-types:
+          - patch
+          - minor
+      dev-minor-and-patch:
+        dependency-type: development
+        update-types:
+          - patch
+          - minor
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: friday
+      time: "12:00"
+      timezone: Europe/London
+    open-pull-requests-limit: 2
+    labels:
+      - maintenance
+      - github-actions
+    cooldown:
+      default-days: 5
+    commit-message:
+      prefix: chore
+      include: scope
+    groups:
+      actions-minor-and-patch:
+        update-types:
+          - patch
+          - minor
