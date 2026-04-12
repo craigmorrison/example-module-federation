@@ -24,7 +24,8 @@
     "*.{js,jsx,ts,tsx,css,md,json}": "oxfmt"
   },
   "overrides": {
-    "defu": ">=6.1.5"
+    "defu": ">=6.1.5",
+    "axios": ">=1.15.0"
   },
   "devDependencies": {
     "@module-federation/enhanced": "^2.3.1",
