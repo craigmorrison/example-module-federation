@@ -40,11 +40,11 @@
     "oxlint": "^1.59.0",
     "swc-loader": "^0.2.7",
     "jsdom": "^29.0.0",
-    "turbo": "^2.9.4",
+    "turbo": "^2.9.6",
     "vite": "^8.0.8",
     "vitest": "^4.0.0",
     "typescript": "^6.0.2",
-    "webpack": "^5.104.0",
+    "webpack": "^5.106.1",
     "webpack-cli": "^7.0.2",
     "webpack-dev-server": "^5.2.3"
   }
