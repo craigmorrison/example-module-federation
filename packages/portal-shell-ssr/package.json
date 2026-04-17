@@ -12,8 +12,8 @@
   "dependencies": {
     "@module-federation/runtime": "^2.3.1",
     "@react-router/node": "^7.14.0",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
     "react-router": "^7.13.0"
   },
   "devDependencies": {
