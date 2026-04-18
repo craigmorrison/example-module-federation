@@ -14,7 +14,7 @@
     "build:webpack": "webpack --mode production -c ./webpack.config.js"
   },
   "dependencies": {
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5"
   }
 }
