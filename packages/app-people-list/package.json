@@ -3,6 +3,12 @@
   "version": "0.2.1",
   "private": true,
   "description": "Producer that renders a people list from SWAPI (MF v2, vite)",
+  "license": "MIT",
+  "author": "Craig Morrison <hello@craigmorrison.co.uk>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/craigmorrison/example-module-federation.git"
+  },
   "main": "src/index.tsx",
   "scripts": {
     "dev": "tsc && vite build -c ./vite.config.js && vite preview -c ./vite.config.js --port 3003 --strictPort",
@@ -11,12 +17,6 @@
     "lint": "oxlint --fix .",
     "format": "oxfmt ."
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/craigmorrison/example-module-federation.git"
-  },
-  "author": "Craig Morrison <hello@craigmorrison.co.uk>",
-  "license": "MIT",
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
