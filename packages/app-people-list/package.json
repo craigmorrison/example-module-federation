@@ -19,15 +19,15 @@
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.0",
-    "@tanstack/react-query": "^5.100.1",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "@emotion/styled": "^11.14.1",
+    "@tanstack/react-query": "^5.100.10",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6"
   },
   "devDependencies": {
-    "@testing-library/react": "^16.3.0",
+    "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
-    "@types/react": "^19.1.0",
-    "@types/react-dom": "^19.1.1"
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3"
   }
 }
