@@ -10,15 +10,15 @@
     "start": "react-router-serve ./build/server/index.js"
   },
   "dependencies": {
-    "@module-federation/runtime": "^2.3.1",
-    "@react-router/node": "^7.14.2",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "react-router": "^7.14.2"
+    "@module-federation/runtime": "^2.4.0",
+    "@react-router/node": "^7.15.0",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "react-router": "^7.15.0"
   },
   "devDependencies": {
-    "@react-router/dev": "^7.14.2",
-    "@types/react": "^19.1.0",
-    "@types/react-dom": "^19.1.0"
+    "@react-router/dev": "^7.15.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3"
   }
 }
