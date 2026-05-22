@@ -1,4 +1,4 @@
-import { css } from '@emotion/react';
+import { css } from "@emotion/react";
 
 // People
 export const sectionHeading = css`
@@ -22,7 +22,7 @@ export const peopleList = css`
   }
 
   @media screen and (min-width: 60em) {
-    gridtemplatecolumns: '1fr 1fr 1fr';
+    gridtemplatecolumns: "1fr 1fr 1fr";
   }
 `;
 

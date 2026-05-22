@@ -1,13 +1,13 @@
-import { ReactElement } from 'react';
-import People from '../people';
+import { ReactElement } from "react";
+import People from "../people";
 import {
   banner,
   bannerTitle,
   contentInfo,
   contentInfoLink,
   siteWrapper,
-  siteMain
-} from './app.styles';
+  siteMain,
+} from "./app.styles";
 
 function App(): ReactElement {
   return (
@@ -21,7 +21,7 @@ function App(): ReactElement {
       </main>
 
       <footer role="contentinfo" css={contentInfo}>
-        Data provided by{' '}
+        Data provided by{" "}
         <a href="https://swapi.dev" css={contentInfoLink}>
           swapi.dev
         </a>
