@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
-import { ReactElement } from 'react';
-import { useQuery } from '@tanstack/react-query'; // Updated import
+import { ReactElement } from "react";
+import { useQuery } from "@tanstack/react-query"; // Updated import
 import {
   sectionHeading,
   peopleHeading,
@@ -10,8 +10,8 @@ import {
   defintionListItem,
   defintionListKey,
   defintionListValue,
-  loadingIndicator
-} from './people-list.styles';
+  loadingIndicator,
+} from "./people-list.styles";
 
 type swPerson = {
   name: string;
@@ -41,9 +41,8 @@ type swPersonList = {
 
 function PeopleList(): ReactElement {
   const { isLoading, error, data } = useQuery({
-    queryKey: ['repoData'], // Updated to use queryKey
-    queryFn: () =>
-      fetch('https://swapi.dev/api/people').then((res) => res.json())
+    queryKey: ["repoData"], // Updated to use queryKey
+    queryFn: () => fetch("https://swapi.dev/api/people").then((res) => res.json()),
   });
 
   if (isLoading) {
