@@ -5,7 +5,7 @@
   "repository": "https://github.com/craigmorrison/example-module-federation.git",
   "author": "Craig Morrison",
   "license": "MIT",
-  "packageManager": "npm@11.14.1",
+  "packageManager": "npm@11.17.0",
   "workspaces": [
     "packages/*"
   ],
@@ -42,6 +42,7 @@
     "jsdom": "^29.1.1",
     "oxfmt": "^0.54.0",
     "oxlint": "^1.67.0",
+    "react-router": "^8.0.1",
     "swc-loader": "^0.2.7",
     "turbo": "^2.9.16",
     "typescript": "^6.0.3",
