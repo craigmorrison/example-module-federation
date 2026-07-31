@@ -11,10 +11,10 @@
   },
   "dependencies": {
     "@module-federation/runtime": "^2.5.0",
-    "@react-router/node": "^8.0.1",
-    "react": "^19.2.6",
-    "react-dom": "^19.2.6",
-    "react-router": "^8.0.1"
+    "@react-router/node": "^8.3.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-router": "^8.3.0"
   },
   "devDependencies": {
     "@react-router/dev": "^8.0.1",
