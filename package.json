@@ -5,7 +5,7 @@
   "repository": "https://github.com/craigmorrison/example-module-federation.git",
   "author": "Craig Morrison",
   "license": "MIT",
-  "packageManager": "npm@12.1.0",
+  "packageManager": "npm@12.2.0",
   "workspaces": [
     "packages/*"
   ],
