@@ -37,7 +37,7 @@
     "@module-federation/vite": "^1.23.4",
     "@rspack/cli": "^2.2.7",
     "@rspack/core": "^2.2.7",
-    "@swc/core": "^1.16.2",
+    "@swc/core": "^1.16.18",
     "@swc/plugin-emotion": "^16.0.0",
     "@vitejs/plugin-react": "^6.1.1",
     "html-webpack-plugin": "^5.6.8",
