@@ -44,7 +44,7 @@
     "jsdom": "^30.1.2",
     "oxfmt": "^0.72.0",
     "oxlint": "^1.85.0",
-    "react-router": "^8.4.0",
+    "react-router": "^8.5.0",
     "swc-loader": "^0.2.7",
     "turbo": "^2.11.4",
     "typescript": "^7.0.2",
