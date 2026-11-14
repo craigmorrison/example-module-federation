@@ -5,7 +5,6 @@ const federationDeps = require('./package.json').dependencies;
 /** @type {import('@rspack/core').Configuration} */
 module.exports = {
   entry: './src/app.js',
-  mode: 'development',
   devServer: {
     static: path.join(__dirname, 'dist'),
     port: 3000,
