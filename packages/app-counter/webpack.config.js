@@ -1,12 +1,15 @@
-const path = require("path");
-const HtmlWebpackPlugin = require("html-webpack-plugin");
-const { ModuleFederationPlugin } = require("webpack").container;
-const deps = require("./package.json").dependencies;
+import path from "node:path";
+import webpack from "webpack";
+import HtmlWebpackPlugin from "html-webpack-plugin";
+import pkg from "./package.json" with { type: "json" };
 
-module.exports = {
+const { ModuleFederationPlugin } = webpack.container;
+const deps = pkg.dependencies;
+
+export default {
   entry: "./src/app.js",
   devServer: {
-    static: path.join(__dirname, "dist"),
+    static: path.join(import.meta.dirname, "dist"),
     port: 3002,
     historyApiFallback: true,
     headers: {
@@ -35,7 +38,7 @@ module.exports = {
   },
   output: {
     filename: "counter.js",
-    path: path.resolve(__dirname, "dist"),
+    path: path.resolve(import.meta.dirname, "dist"),
     clean: true,
   },
   plugins: [

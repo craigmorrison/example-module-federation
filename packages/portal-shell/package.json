@@ -6,7 +6,7 @@
   "license": "MIT",
   "author": "Craig Morrison",
   "repository": "https://github.com/craigmorrison/example-module-federation.git",
-  "main": "index.js",
+  "type": "module",
   "scripts": {
     "dev": "rspack serve --mode development -c ./rspack.config.js",
     "build": "rspack build --mode production -c ./rspack.config.js"

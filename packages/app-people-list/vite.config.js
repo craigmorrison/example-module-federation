@@ -1,8 +1,7 @@
 import { defineConfig } from "vite";
 import { federation } from "@module-federation/vite";
 import react from "@vitejs/plugin-react";
-
-const federationConfig = require("./federation.config.js");
+import federationConfig from "./federation.config.js";
 
 // Leave PUBLIC_URL unset and the remote resolves its assets relative to wherever its
 // remote entry was loaded from (publicPath "auto"), so one build works in any

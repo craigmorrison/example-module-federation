@@ -9,6 +9,7 @@
     "type": "git",
     "url": "https://github.com/craigmorrison/example-module-federation.git"
   },
+  "type": "module",
   "main": "src/index.tsx",
   "scripts": {
     "dev": "tsc && vite build -c ./vite.config.js && vite preview -c ./vite.config.js --port 3003 --strictPort",
