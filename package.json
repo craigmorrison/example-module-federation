@@ -45,5 +45,5 @@
     "*.{js,jsx,ts,tsx}": "oxlint --fix",
     "*.{js,jsx,ts,tsx,css,md,json}": "oxfmt"
   },
-  "packageManager": "npm@11.14.1"
+  "packageManager": "npm@12.2.0"
 }
