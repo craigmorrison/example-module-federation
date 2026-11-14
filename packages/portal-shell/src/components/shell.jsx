@@ -1,11 +1,6 @@
 import Header from "./header";
-import { lazyRemote } from "../remotes";
-import React from "react";
+import RemoteBoundary from "./remote-boundary";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router";
-
-const Table = lazyRemote("table/Table");
-const Counter = lazyRemote("counter/Counter");
-const People = lazyRemote("people/People");
 
 function Home() {
   return (
@@ -38,14 +33,12 @@ function Shell() {
         </nav>
       </Header>
 
-      <React.Suspense fallback="Loading">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/table" element={<Table />} />
-          <Route path="/counter" element={<Counter />} />
-          <Route path="/people" element={<People />} />
-        </Routes>
-      </React.Suspense>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/table" element={<RemoteBoundary id="table/Table" name="Table" />} />
+        <Route path="/counter" element={<RemoteBoundary id="counter/Counter" name="Counter" />} />
+        <Route path="/people" element={<RemoteBoundary id="people/People" name="People" />} />
+      </Routes>
     </Router>
   );
 }
