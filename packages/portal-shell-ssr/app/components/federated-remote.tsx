@@ -1,5 +1,6 @@
-import { lazy, Suspense, useEffect, useState, type ComponentType } from "react";
+import { Suspense, useEffect, useState, type ComponentType } from "react";
 import { loadRemote } from "@module-federation/runtime";
+import { remotesReady } from "../federation.client";
 
 const remoteCache = new Map<string, ComponentType>();
 
@@ -12,7 +13,8 @@ function useFederatedComponent(remote: string) {
   useEffect(() => {
     if (Component) return;
 
-    loadRemote<{ default: ComponentType }>(remote)
+    remotesReady
+      .then(() => loadRemote<{ default: ComponentType }>(remote))
       .then((mod) => {
         if (mod?.default) {
           remoteCache.set(remote, mod.default);
