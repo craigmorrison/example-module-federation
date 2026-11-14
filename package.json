@@ -36,7 +36,6 @@
     "@rspack/cli": "^2.3.2",
     "@rspack/core": "^2.3.2",
     "@swc/core": "^1.16.22",
-    "@swc/plugin-emotion": "^14.19.0",
     "@vitejs/plugin-react": "^6.3.0",
     "html-webpack-plugin": "^5.6.8",
     "jsdom": "^29.1.1",
