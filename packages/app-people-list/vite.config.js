@@ -4,6 +4,11 @@ import react from "@vitejs/plugin-react";
 
 const federationConfig = require("./federation.config.js");
 
+// Leave PUBLIC_URL unset and the remote resolves its assets relative to wherever its
+// remote entry was loaded from (publicPath "auto"), so one build works in any
+// environment. Set it (e.g. https://cdn.example.com/people/) to pin an absolute URL.
+const publicUrl = process.env.PUBLIC_URL ?? "";
+
 export default defineConfig({
   plugins: [
     react({ jsxImportSource: "@emotion/react" }),
@@ -17,14 +22,14 @@ export default defineConfig({
     port: 3003,
     strictPort: true,
     cors: true,
-    origin: "http://localhost:3003",
+    origin: publicUrl || "http://localhost:3003",
   },
   preview: {
     port: 3003,
     strictPort: true,
     cors: true,
   },
-  base: "http://localhost:3003/",
+  base: publicUrl,
   build: {
     target: "esnext",
     outDir: "dist",

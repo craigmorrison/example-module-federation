@@ -1,0 +1,5 @@
+{
+  "table": "http://localhost:3001/mf-manifest.json",
+  "counter": "http://localhost:3002/counter-remote-entry.js",
+  "people": "http://localhost:3003/mf-manifest.json"
+}

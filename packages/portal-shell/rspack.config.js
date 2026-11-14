@@ -1,18 +1,18 @@
-const path = require('path');
-const rspack = require('@rspack/core');
-const federationDeps = require('./package.json').dependencies;
+const path = require("path");
+const rspack = require("@rspack/core");
+const { ModuleFederationPlugin } = require("@module-federation/enhanced/rspack");
+const federationDeps = require("./package.json").dependencies;
 
 /** @type {import('@rspack/core').Configuration} */
 module.exports = {
-  entry: './src/app.js',
-  mode: 'development',
+  entry: "./src/bootstrap.jsx",
   devServer: {
-    static: path.join(__dirname, 'dist'),
+    static: path.join(__dirname, "dist"),
     port: 3000,
     historyApiFallback: true,
     headers: {
-      'Access-Control-Allow-Origin': '*'
-    }
+      "Access-Control-Allow-Origin": "*",
+    },
   },
   module: {
     rules: [
@@ -20,40 +20,42 @@ module.exports = {
         test: /\.m?jsx?$/,
         exclude: /node_modules/,
         use: {
-          loader: 'builtin:swc-loader',
+          loader: "builtin:swc-loader",
           options: {
             jsc: {
-              parser: { syntax: 'ecmascript', jsx: true },
-              transform: { react: { runtime: 'automatic' } }
-            }
-          }
-        }
-      }
-    ]
+              parser: { syntax: "ecmascript", jsx: true },
+              transform: { react: { runtime: "automatic" } },
+            },
+          },
+        },
+      },
+    ],
   },
   resolve: {
-    extensions: ['.js', '.jsx']
+    extensions: [".js", ".jsx"],
   },
   output: {
-    filename: 'portal.js',
-    path: path.resolve(__dirname, 'dist'),
-    crossOriginLoading: 'anonymous',
-    clean: true
+    filename: "portal.js",
+    publicPath: "auto",
+    path: path.resolve(__dirname, "dist"),
+    crossOriginLoading: "anonymous",
+    clean: true,
   },
   plugins: [
-    new rspack.HtmlRspackPlugin({ template: './static/index.html' }),
-    new rspack.container.ModuleFederationPlugin({
-      name: 'shell',
-      filename: 'remoteEntry.js',
-      remotes: {
-        table: 'table@http://localhost:3001/table-remote-entry.js',
-        counter: 'counter@http://localhost:3002/counter-remote-entry.js',
-        people: 'people@http://localhost:3003/people-remote-entry.js'
-      },
+    new rspack.HtmlRspackPlugin({ template: "./static/index.html" }),
+    // Runtime remotes config, edit or replace it per environment (see README).
+    new rspack.CopyRspackPlugin({ patterns: [{ from: "static/remotes.json" }] }),
+    new ModuleFederationPlugin({
+      name: "shell",
+      filename: "remoteEntry.js",
+      // The default (version-first) loads every remote's entry before any module, so one
+      // unreachable remote would break them all. loaded-first resolves shared deps lazily.
+      shareStrategy: "loaded-first",
+      experiments: { asyncStartup: true },
       shared: {
-        react: { eager: true, singleton: true, requiredVersion: federationDeps.react },
-        'react-dom': { eager: true, singleton: true, requiredVersion: federationDeps['react-dom'] }
-      }
-    })
-  ]
+        react: { singleton: true, requiredVersion: federationDeps.react },
+        "react-dom": { singleton: true, requiredVersion: federationDeps["react-dom"] },
+      },
+    }),
+  ],
 };

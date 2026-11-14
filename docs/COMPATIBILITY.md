@@ -40,12 +40,14 @@ There are two valid migration orders. Which one you use depends on your shared m
 
 ### `eager`
 
-| Consumer | Producer | Result |
-|---|---|---|
-| `true` | `true` | Both bundle their own copy. The shared scope negotiation picks one at runtime. No async loading needed. **Safest configuration.** |
-| `true` | `false` | Consumer's copy is available synchronously. Producer's copy loads async during `import('./bootstrap')`. Works if the producer has the async bootstrap pattern. |
-| `false` | `true` | Producer's copy is available synchronously but the consumer hasn't initialised the shared scope yet. **Can cause load-order failures** — the producer's eager copy may not register in time. |
-| `false` | `false` | Both copies load async. Requires the bootstrap pattern on both sides. Standard MF v1 setup. Works in v1→v2 migration as long as both sides have the async boundary. |
+| Consumer | Producer | Result                                                                                                                                                                                       |
+| -------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `true`   | `true`   | Both bundle their own copy. The shared scope negotiation picks one at runtime. No async loading needed. **Safest configuration.**                                                            |
+| `true`   | `false`  | Consumer's copy is available synchronously. Producer's copy loads async during `import('./bootstrap')`. Works if the producer has the async bootstrap pattern.                               |
+| `false`  | `true`   | Producer's copy is available synchronously but the consumer hasn't initialised the shared scope yet. **Can cause load-order failures** — the producer's eager copy may not register in time. |
+| `false`  | `false`  | Both copies load async. Requires the bootstrap pattern on both sides. Standard MF v1 setup. Works in v1→v2 migration as long as both sides have the async boundary.                          |
+
+> **Do not set `eager: true` on producers.** An eager shared module is bundled into the producer's remote entry, so every remote ships its own full copy of React and react-dom whether or not the shared scope picks it. This repo's producers and shell are all non-eager. Use the async boundary instead: the bootstrap pattern (webpack, MF v1) or `experiments: { asyncStartup: true }` (MF 2, see below).
 
 **Key point**: `eager` is a build-time decision that changes the webpack chunk graph. It cannot be negotiated at runtime. Changing it during migration changes how chunks are structured and can break other producers that depend on the loading order.
 
@@ -53,30 +55,30 @@ There are two valid migration orders. Which one you use depends on your shared m
 
 ### `singleton`
 
-| Consumer | Producer | Result |
-|---|---|---|
-| `true` | `true` | Only one instance of the module exists at runtime. The shared scope picks the best version (usually highest semver match). **Required for React** — multiple instances break hooks and context. |
-| `true` | `false` | Consumer wants a singleton, producer doesn't care. The consumer's singleton wins and the producer uses it. Works fine. |
-| `false` | `true` | Producer wants a singleton but the consumer doesn't enforce it. The producer will still try to register as singleton, but the consumer may have already loaded its own non-singleton copy. **Can cause duplicate instances.** |
-| `false` | `false` | Each side loads its own copy. Fine for stateless utilities (lodash, date-fns). **Not safe for React, state managers, or anything with module-level state.** |
+| Consumer | Producer | Result                                                                                                                                                                                                                        |
+| -------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `true`   | `true`   | Only one instance of the module exists at runtime. The shared scope picks the best version (usually highest semver match). **Required for React** — multiple instances break hooks and context.                               |
+| `true`   | `false`  | Consumer wants a singleton, producer doesn't care. The consumer's singleton wins and the producer uses it. Works fine.                                                                                                        |
+| `false`  | `true`   | Producer wants a singleton but the consumer doesn't enforce it. The producer will still try to register as singleton, but the consumer may have already loaded its own non-singleton copy. **Can cause duplicate instances.** |
+| `false`  | `false`  | Each side loads its own copy. Fine for stateless utilities (lodash, date-fns). **Not safe for React, state managers, or anything with module-level state.**                                                                   |
 
 ### `requiredVersion`
 
-| Configuration | Behavior |
-|---|---|
-| Set on both sides, ranges overlap | Shared scope picks a version satisfying both ranges. Works correctly. |
+| Configuration                           | Behavior                                                                                                                                                                         |
+| --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Set on both sides, ranges overlap       | Shared scope picks a version satisfying both ranges. Works correctly.                                                                                                            |
 | Set on both sides, ranges don't overlap | Each side falls back to its own bundled copy. Produces a runtime warning. With `singleton: true`, the first version to load wins — which may not satisfy the other side's range. |
-| Set on one side only | The side without `requiredVersion` accepts any version. The side with it gets version validation. |
-| Not set on either side | Any version wins. No validation. First to register in the shared scope is used by everyone. **Risky with singleton deps.** |
+| Set on one side only                    | The side without `requiredVersion` accepts any version. The side with it gets version validation.                                                                                |
+| Not set on either side                  | Any version wins. No validation. First to register in the shared scope is used by everyone. **Risky with singleton deps.**                                                       |
 
 **Recommendation**: Always set `requiredVersion: deps['package-name']` — it reads from package.json so it stays in sync automatically and gives you runtime warnings on mismatches.
 
 ### `strictVersion`
 
-| Value | Behavior |
-|---|---|
+| Value             | Behavior                                                                                             |
+| ----------------- | ---------------------------------------------------------------------------------------------------- |
 | `false` (default) | Version mismatches produce a console warning. The app continues running with the mismatched version. |
-| `true` | Version mismatches **throw a runtime error** and the app crashes. |
+| `true`            | Version mismatches **throw a runtime error** and the app crashes.                                    |
 
 **Migration risk**: If v1 producers use `strictVersion: true` and the v2 consumer's shared scope resolution picks a different "winner" version than v1 did, those producers crash at runtime with no graceful fallback. The v2 runtime has a slightly different resolution algorithm that usually picks the same version, but with complex dependency trees (many producers providing different patch versions), the winner can change.
 
@@ -84,10 +86,10 @@ There are two valid migration orders. Which one you use depends on your shared m
 
 ### `shareScope`
 
-| Configuration | Behavior |
-|---|---|
-| Default (`'default'`) | All packages share a single scope. v2's backward-compatibility patching covers this. **Use this.** |
-| Custom name | Creates an isolated sharing scope. v2's patching only covers the `'default'` scope — custom scopes are not bridged between v1 and v2 runtimes. Shared modules resolve from an empty scope and fall back to bundled copies, causing duplicate instances for singletons. |
+| Configuration         | Behavior                                                                                                                                                                                                                                                               |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Default (`'default'`) | All packages share a single scope. v2's backward-compatibility patching covers this. **Use this.**                                                                                                                                                                     |
+| Custom name           | Creates an isolated sharing scope. v2's patching only covers the `'default'` scope — custom scopes are not bridged between v1 and v2 runtimes. Shared modules resolve from an empty scope and fall back to bundled copies, causing duplicate instances for singletons. |
 
 **Migration risk**: If any producer uses a custom `shareScope`, the v2 consumer cannot negotiate shared modules with it. You must migrate that producer to v2 (so both sides use the same runtime) or move it back to the default scope before upgrading the consumer.
 
@@ -115,13 +117,13 @@ This works transparently for the `'default'` scope with standard shared configs.
 
 ### What breaks the interop
 
-| Scenario | Why it breaks | Workaround |
-|---|---|---|
-| v1 consumer + v2 producer (advanced features) | v1 consumer can load v2's `remoteEntry.js` (standard format), but v2 runtime features aren't initialised | Producers-first migration (Path B) — basic functionality works, v2 features are deferred |
-| Custom `shareScope` names | v2 patching only covers `'default'` | Move all packages to `'default'` scope before migrating |
-| Manual `__webpack_init_sharing__` calls | Custom runtime code may bypass v2's patches | Audit and update custom bootstrap code |
-| `strictVersion: true` + different resolution winner | v2 resolution may pick a different version than v1 did | Remove `strictVersion` during migration or migrate affected producers first |
-| Side-effect-dependent load order | v2 may resolve shared modules in a different order | Remove side effects from shared modules, or use `eager: true` to make order deterministic |
+| Scenario                                            | Why it breaks                                                                                            | Workaround                                                                                |
+| --------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| v1 consumer + v2 producer (advanced features)       | v1 consumer can load v2's `remoteEntry.js` (standard format), but v2 runtime features aren't initialised | Producers-first migration (Path B) — basic functionality works, v2 features are deferred  |
+| Custom `shareScope` names                           | v2 patching only covers `'default'`                                                                      | Move all packages to `'default'` scope before migrating                                   |
+| Manual `__webpack_init_sharing__` calls             | Custom runtime code may bypass v2's patches                                                              | Audit and update custom bootstrap code                                                    |
+| `strictVersion: true` + different resolution winner | v2 resolution may pick a different version than v1 did                                                   | Remove `strictVersion` during migration or migrate affected producers first               |
+| Side-effect-dependent load order                    | v2 may resolve shared modules in a different order                                                       | Remove side effects from shared modules, or use `eager: true` to make order deterministic |
 
 ---
 
@@ -131,21 +133,23 @@ Rspack has a **built-in** Module Federation implementation (v1.5) that is fully 
 
 ```js
 // Rspack native v1.5 — same API as webpack's native MF
-const { ModuleFederationPlugin } = require('@rspack/core').container;
+const { ModuleFederationPlugin } = require("@rspack/core").container;
 
 // vs. @module-federation/enhanced v2 — different runtime
-const { ModuleFederationPlugin } = require('@module-federation/enhanced/rspack');
+const { ModuleFederationPlugin } = require("@module-federation/enhanced/rspack");
 ```
 
 ### v1.5 vs v2 on rspack
 
-| | Rspack native v1.5 | @module-federation/enhanced v2 |
-|---|---|---|
-| **v1 producer compat** | Full — same protocol as webpack v1 | Supposed to work, but manifest resolution can fail with v1 producers |
-| **v2 producer compat** | Can load `remoteEntry.js` but no manifest support | Full — manifest, type hints, devtools |
-| **Remote entry format** | UMD (classic script) | UMD + optional `mf-manifest.json` |
-| **Shared scope** | `__webpack_share_scopes__` (same as webpack) | Patched version with v2 runtime SDK |
-| **Build speed** | 10-20x faster than webpack | Same (rspack under the hood) |
+|                         | Rspack native v1.5                                | @module-federation/enhanced v2                                       |
+| ----------------------- | ------------------------------------------------- | -------------------------------------------------------------------- |
+| **v1 producer compat**  | Full — same protocol as webpack v1                | Supposed to work, but manifest resolution can fail with v1 producers |
+| **v2 producer compat**  | Can load `remoteEntry.js` but no manifest support | Full — manifest, type hints, devtools                                |
+| **Remote entry format** | UMD (classic script)                              | UMD + optional `mf-manifest.json`                                    |
+| **Shared scope**        | `__webpack_share_scopes__` (same as webpack)      | Patched version with v2 runtime SDK                                  |
+| **Build speed**         | 10-20x faster than webpack                        | Same (rspack under the hood)                                         |
+
+> **Update**: in this repo the shell uses `@module-federation/enhanced` and loads the v1 `app-counter` from its plain `counter-remote-entry.js` while loading the v2 producers from `mf-manifest.json`. Both kinds are registered at runtime with `registerRemotes` (an entry ending in `.json` is a manifest, anything else is a remote entry script), and the e2e test passes. The failure described below needs a v1 producer to be addressed as if it had a manifest.
 
 ### The manifest incompatibility
 
@@ -165,27 +169,27 @@ This requires a metadata layer that tells the consumer which protocol each produ
 ```js
 // rspack.config.js — static v1 remotes
 new ModuleFederationPlugin({
-  name: 'shell',
+  name: "shell",
   remotes: {
     // v1 producers loaded as classic scripts
-    counter: 'counter@http://localhost:3002/counter-remote-entry.js'
+    counter: "counter@http://localhost:3002/counter-remote-entry.js",
   },
-  shared: { react: { singleton: true, eager: true } }
+  shared: { react: { singleton: true, eager: true } },
 });
 
 // entry.js — dynamic v2 remotes loaded at runtime
-import { init, loadRemote } from '@module-federation/runtime';
+import { init, loadRemote } from "@module-federation/runtime";
 
 init({
-  name: 'shell',
+  name: "shell",
   remotes: [
     // v2 producers loaded via manifest
-    { name: 'table', entry: 'http://localhost:3001/mf-manifest.json' }
-  ]
+    { name: "table", entry: "http://localhost:3001/mf-manifest.json" },
+  ],
 });
 
 // Later, in a route handler:
-const Table = React.lazy(() => loadRemote('table/Table'));
+const Table = React.lazy(() => loadRemote("table/Table"));
 ```
 
 This pattern allows incremental migration — producers upgrade to v2 at their own pace, and the consumer's metadata layer routes to the right loading mechanism.
@@ -202,10 +206,10 @@ When using `@module-federation/enhanced` (v2), the same applies — the enhanced
 
 ```js
 // webpack
-const { ModuleFederationPlugin } = require('@module-federation/enhanced/webpack');
+const { ModuleFederationPlugin } = require("@module-federation/enhanced/webpack");
 
 // rspack
-const { ModuleFederationPlugin } = require('@module-federation/enhanced/rspack');
+const { ModuleFederationPlugin } = require("@module-federation/enhanced/rspack");
 ```
 
 Rspack uses `builtin:swc-loader` instead of `swc-loader` but this only affects build-time — the output format is the same.
@@ -214,16 +218,17 @@ Rspack uses `builtin:swc-loader` instead of `swc-loader` but this only affects b
 
 `@module-federation/vite` bridges Vite's native ESM architecture with the MF shared scope protocol. Key differences:
 
-| Behavior | Webpack/Rspack | Vite |
-|---|---|---|
-| `eager: true` | Module bundled into the entry chunk | **Ignored in dev** (native ESM). Honoured in production build. |
-| `singleton: true` | Enforced via shared scope at runtime | Enforced in production. In dev, depends on Vite's module resolution. |
-| `requiredVersion` | Checked at runtime | Checked at runtime in production. **Not checked in dev.** |
-| Dev server | webpack-dev-server / @rspack/dev-server | Vite dev server (native ESM, no bundling) |
-| Remote entry format | Standard `remoteEntry.js` | Standard `remoteEntry.js` (production) |
-| Chunk splitting | Respects `eager` flag | `@module-federation/vite` manages chunks automatically — `build.rollupOptions.output.manualChunks` must not be used |
+| Behavior            | Webpack/Rspack                          | Vite                                                                                                                |
+| ------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `eager: true`       | Module bundled into the entry chunk     | **Ignored in dev** (native ESM). Honoured in production build.                                                      |
+| `singleton: true`   | Enforced via shared scope at runtime    | Enforced in production. In dev, depends on Vite's module resolution.                                                |
+| `requiredVersion`   | Checked at runtime                      | Checked at runtime in production. **Not checked in dev.**                                                           |
+| Dev server          | webpack-dev-server / @rspack/dev-server | Vite dev server (native ESM, no bundling)                                                                           |
+| Remote entry format | Standard `remoteEntry.js`               | Standard `remoteEntry.js` (production)                                                                              |
+| Chunk splitting     | Respects `eager` flag                   | `@module-federation/vite` manages chunks automatically — `build.rollupOptions.output.manualChunks` must not be used |
 
 **Practical implications**:
+
 - In production builds, all three bundlers produce compatible remote entries and negotiate shared modules the same way
 - In dev, Vite behaves differently — shared modules may be duplicated or resolved differently than in webpack/rspack. **Always test shared module behavior with production builds**, not just dev servers
 - Version strings must be valid semver for cross-bundler negotiation to work. Non-semver strings (git hashes, `"latest"`, `"workspace:*"`) break negotiation silently
@@ -232,19 +237,21 @@ Rspack uses `builtin:swc-loader` instead of `swc-loader` but this only affects b
 
 ## The async bootstrap pattern
 
+> **MF 2 alternative: `asyncStartup`.** With `@module-federation/enhanced` you can set `experiments: { asyncStartup: true }` on the plugin and point the entry straight at the real entry file (`src/bootstrap.jsx`), with no `app.js` -> `import('./bootstrap')` indirection. The plugin makes the entry wait for shared-scope negotiation itself. `portal-shell` and `app-table` do this. `app-counter` is native webpack MF v1, which has no such option, so it keeps the bootstrap pattern below.
+
 Every producer entry point must follow this pattern for shared modules to resolve correctly:
 
 ```js
 // app.js (the actual entry point)
-import('./bootstrap');
+import("./bootstrap");
 ```
 
 ```jsx
 // bootstrap.jsx (the async boundary)
-import { createRoot } from 'react-dom/client';
-import App from './components/app';
+import { createRoot } from "react-dom/client";
+import App from "./components/app";
 
-createRoot(document.getElementById('root')).render(<App />);
+createRoot(document.getElementById("root")).render(<App />);
 ```
 
 ### Why this is required
@@ -257,16 +264,17 @@ The dynamic `import()` creates an async chunk boundary. When webpack/rspack enco
 
 ### When you can skip it
 
-- **`eager: true` on all shared modules in all packages**: The modules are bundled into the entry chunk, so no async resolution is needed. But this increases bundle size and makes shared scope negotiation less flexible.
+- **MF 2 with `asyncStartup: true`**: the plugin adds the async boundary for you.
+- **`eager: true` on all shared modules in all packages**: The modules are bundled into the entry chunk, so no async resolution is needed. But every remote then carries its own copy of React, which defeats sharing, so avoid it.
 - **Vite in dev mode**: `@module-federation/vite` handles the async boundary internally. But you still need the pattern for webpack/rspack compatibility.
 
 ### Common mistakes
 
-| Mistake | Symptom | Fix |
-|---|---|---|
-| No async boundary, `eager: false` | `Cannot read properties of undefined` on shared module imports | Add the `app.js` → `import('./bootstrap')` pattern |
-| Importing shared modules in `app.js` (before the boundary) | Shared modules resolve before negotiation | Move all shared module imports to `bootstrap.jsx` or deeper |
-| Multiple async boundaries (nested dynamic imports) | Shared modules resolved multiple times, potential duplicates | Single async boundary at the entry point, synchronous imports after that |
+| Mistake                                                    | Symptom                                                        | Fix                                                                      |
+| ---------------------------------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| No async boundary, `eager: false`                          | `Cannot read properties of undefined` on shared module imports | Add the `app.js` → `import('./bootstrap')` pattern                       |
+| Importing shared modules in `app.js` (before the boundary) | Shared modules resolve before negotiation                      | Move all shared module imports to `bootstrap.jsx` or deeper              |
+| Multiple async boundaries (nested dynamic imports)         | Shared modules resolved multiple times, potential duplicates   | Single async boundary at the entry point, synchronous imports after that |
 
 ---
 
@@ -276,12 +284,12 @@ The dynamic `import()` creates an async chunk boundary. When webpack/rspack enco
 
 ```js
 shared: {
-  react: { eager: true, singleton: true, requiredVersion: deps.react },
-  'react-dom': { eager: true, singleton: true, requiredVersion: deps['react-dom'] }
+  react: { singleton: true, requiredVersion: deps.react },
+  'react-dom': { singleton: true, requiredVersion: deps['react-dom'] }
 }
 ```
 
-Use `eager: true` for core framework deps (React, react-dom). Use `eager: false` for larger optional deps (design systems, data fetching libraries) to keep bundle sizes down.
+Keep `eager` off (the default) and rely on the async boundary (`asyncStartup` on MF 2, the bootstrap pattern on v1). Eager shared modules are bundled into each entry, so every remote would carry its own React.
 
 ### For v1 → v2 migration
 

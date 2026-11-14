@@ -32,13 +32,6 @@ type swPerson = {
   url: string;
 };
 
-type swPersonList = {
-  count: number;
-  next: string | null;
-  previous: string | null;
-  results: swPerson[];
-};
-
 function PeopleList(): ReactElement {
   const { isLoading, error, data } = useQuery({
     queryKey: ["repoData"], // Updated to use queryKey

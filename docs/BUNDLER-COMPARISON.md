@@ -4,15 +4,15 @@ A practical comparison of Webpack, Rspack, and Vite as Module Federation produce
 
 ## Summary
 
-| | Webpack | Rspack | Vite 8 |
-|---|---|---|---|
-| **MF version** | v1 (native) or v2 (enhanced) | v2 (enhanced) | v2 (vite plugin) |
-| **Dev server** | webpack-dev-server | @rspack/dev-server | vite dev / vite preview |
-| **Transpiler** | swc-loader | builtin:swc-loader | Rolldown (built-in) |
-| **Dev mode MF** | Works with all consumers | Works with all consumers | **Only works with Vite consumers** |
-| **Production MF** | Works with all consumers | Works with all consumers | Works with all consumers |
-| **Remote entry format** | UMD (classic script) | UMD (classic script) | ESM (module) |
-| **Build speed** | ~1-2s | ~70-130ms | ~1.5s |
+|                         | Webpack                      | Rspack                   | Vite 8                             |
+| ----------------------- | ---------------------------- | ------------------------ | ---------------------------------- |
+| **MF version**          | v1 (native) or v2 (enhanced) | v2 (enhanced)            | v2 (vite plugin)                   |
+| **Dev server**          | webpack-dev-server           | @rspack/dev-server       | vite dev / vite preview            |
+| **Transpiler**          | swc-loader                   | builtin:swc-loader       | Rolldown (built-in)                |
+| **Dev mode MF**         | Works with all consumers     | Works with all consumers | **Only works with Vite consumers** |
+| **Production MF**       | Works with all consumers     | Works with all consumers | Works with all consumers           |
+| **Remote entry format** | UMD (classic script)         | UMD (classic script)     | ESM (module)                       |
+| **Build speed**         | ~1-2s                        | ~70-130ms                | ~1.5s                              |
 
 ## The Vite dev mode limitation
 
@@ -47,12 +47,12 @@ This builds the production bundle (which outputs standard JS) and serves it via 
 
 ### Tradeoff
 
-| | `vite dev` | `vite build + preview` |
-|---|---|---|
-| HMR | Yes | No (requires rebuild) |
-| Speed | Instant startup | Build step on every change |
-| Cross-bundler compat | **No** | Yes |
-| Consumer compatibility | Vite consumers only | All consumers |
+|                        | `vite dev`          | `vite build + preview`     |
+| ---------------------- | ------------------- | -------------------------- |
+| HMR                    | Yes                 | No (requires rebuild)      |
+| Speed                  | Instant startup     | Build step on every change |
+| Cross-bundler compat   | **No**              | Yes                        |
+| Consumer compatibility | Vite consumers only | All consumers              |
 
 ### When Vite dev mode works
 
@@ -70,11 +70,13 @@ This builds the production bundle (which outputs standard JS) and serves it via 
 Rolldown (Vite 8's underlying Rust bundler) has **native Module Federation merged into its git main branch** (March 2025, announced by Evan You). This is not a plugin — it's built-in MF at the bundler level, implementing webpack-compatible `__webpack_share_scopes__` semantics.
 
 When this lands in a published Rolldown release, it should fix the cross-bundler dev mode issues because:
+
 - Vite producers would speak the same shared scope protocol as webpack/rspack
 - No need for `@module-federation/vite` plugin (which is the broken layer)
 - Dev mode and production would use the same MF implementation
 
 **Current status** (as of March 2026):
+
 - Vite 8.0.3 ships with `rolldown@1.0.0-rc.12` — **native MF is NOT in this release**
 - `@module-federation/vite` (the plugin) is still the only option for Vite MF
 - The Rolldown example repo (`rolldown/rolldown-vite-module-federation-example`) has open issues — the implementation is still rough
@@ -88,12 +90,12 @@ Rspack configs are nearly identical to webpack. The main differences:
 
 ```js
 // Webpack
-const { ModuleFederationPlugin } = require('@module-federation/enhanced/webpack');
-loader: 'swc-loader'
+const { ModuleFederationPlugin } = require("@module-federation/enhanced/webpack");
+loader: "swc-loader";
 
 // Rspack
-const { ModuleFederationPlugin } = require('@module-federation/enhanced/rspack');
-loader: 'builtin:swc-loader'
+const { ModuleFederationPlugin } = require("@module-federation/enhanced/rspack");
+loader: "builtin:swc-loader";
 ```
 
 Everything else — devServer config, shared module config, federation config — is the same. Rspack is a drop-in replacement for webpack with 10-20x faster builds.
@@ -106,43 +108,42 @@ Native webpack Module Federation (v1) is the most battle-tested option. The `@mo
 
 Webpack producers work with every consumer in both dev and production. If you're migrating an existing MFE ecosystem, keeping producers on webpack until you've validated the consumer upgrade is the lowest-risk approach.
 
-## SSR consumer limitations
+## SSR consumer
 
-The SSR consumer (`portal-shell-ssr`) uses React Router 7 framework mode with `@module-federation/runtime` for client-side remote loading. In dev mode, this hits the same cross-bundler compatibility wall:
+The SSR consumer (`portal-shell-ssr`) uses React Router 7 framework mode with `@module-federation/runtime` for client-side remote loading. The shell chrome is server-rendered and the remotes load as client-only islands after hydration.
 
-| Producer bundler | SSR consumer (dev) | Error |
-|---|---|---|
-| webpack (counter) | Duplicate React instances | `useState` throws — two React copies, shared scope not negotiated |
-| rspack (table) | Rspack internals not resolved | `can't access '__rspack_default_export' before initialization` |
-| vite (people) | CJS/ESM mismatch | `require is not defined` — federation.config.js uses CJS |
+**Dev mode works** with all three producers (webpack counter, rspack table, vite people) when the runtime is given React explicitly. An earlier version of this repo failed because it relied on the bundler's share scope, which Vite does not provide:
 
-**Root cause**: The `@module-federation/runtime` `loadRemote()` in a Vite dev context doesn't negotiate shared modules with webpack/rspack producers. The producers' remote entries expect a webpack-like `__webpack_share_scopes__` runtime that doesn't exist in Vite's ESM environment.
+| Producer bundler  | Earlier failure                                                 |
+| ----------------- | --------------------------------------------------------------- |
+| webpack (counter) | `useState` threw: two React copies, shared scope not negotiated |
+| rspack (table)    | `can't access '__rspack_default_export' before initialization`  |
+| vite (people)     | `require is not defined`, from the federation config being CJS  |
 
-**The SSR shell architecture is sound** — the server-rendered shell chrome works, client-only Suspense islands work, splat catch-all routes work. The gap is in the MF runtime's ability to bridge shared scopes across bundler formats in dev mode.
+What fixed it, in `packages/portal-shell-ssr/app/federation.client.ts`:
 
-**In production** (all packages built), the formats align and cross-bundler federation works. The dev mode limitation applies to both the SPA consumer (worked around with `vite build + preview`) and the SSR consumer (not yet worked around).
+- `init()` receives `shared: { react: { lib: () => React, ... }, 'react-dom': { lib: () => ReactDOM, ... } }`, so the runtime has its own shared scope with the shell's React and never needs `__webpack_share_scopes__`.
+- Producers no longer set `eager: true`, so their remote entries don't bundle a second React that would win the negotiation.
+- Remotes are registered from `/remotes.json` and consumed through `mf-manifest.json` where the producer has one.
 
-A production-ready SSR consumer would need either:
-- All producers to output webpack-compatible UMD remote entries (which rspack does natively, but vite doesn't in dev)
-- A `build + serve` workflow for all producers (losing HMR everywhere)
-- All producers and the consumer on the same bundler
+Only the dev server (`react-router dev`) was exercised. `react-router build` succeeds, but the built server has not been checked against live remotes. The remote islands still render on the client only, so there is no SSR of remote content.
 
 ## Consumer bundler choice
 
 The consumer (shell) has stricter requirements than producers because it controls the shared scope runtime.
 
-| Consumer bundler | v1 producers | v2 producers | SSR support |
-|---|---|---|---|
-| **webpack** (native MF v1) | Full compat | Can load `remoteEntry.js` but no manifest features | Custom Express SSR with `@module-federation/node` |
-| **rspack** (native v1.5) | Full compat (same protocol as webpack) | Can load `remoteEntry.js` but no manifest features | Custom SSR possible |
-| **rspack** (`@module-federation/enhanced`) | Manifest resolution can fail with v1 producers | Full compat | Custom SSR possible |
-| **vite** | **Broken in dev** — can't negotiate `__webpack_share_scopes__` | Works in production only | React Router 7 framework mode (SSR shell works, MFE loading broken in dev) |
-| **Next.js** (webpack mode) | Via `@module-federation/nextjs-mf` | Via `@module-federation/nextjs-mf` | Built-in SSR |
-| **Next.js** (Turbopack) | **No MF support** | **No MF support** | N/A |
+| Consumer bundler                           | v1 producers                                                        | v2 producers                                       | SSR support                                                    |
+| ------------------------------------------ | ------------------------------------------------------------------- | -------------------------------------------------- | -------------------------------------------------------------- |
+| **webpack** (native MF v1)                 | Full compat                                                         | Can load `remoteEntry.js` but no manifest features | Custom Express SSR with `@module-federation/node`              |
+| **rspack** (native v1.5)                   | Full compat (same protocol as webpack)                              | Can load `remoteEntry.js` but no manifest features | Custom SSR possible                                            |
+| **rspack** (`@module-federation/enhanced`) | Manifest resolution can fail with v1 producers                      | Full compat                                        | Custom SSR possible                                            |
+| **vite**                                   | Works with the runtime API and explicit `shared` `lib`s (see above) | Works                                              | React Router 7 framework mode (shell SSR, remotes client-only) |
+| **Next.js** (webpack mode)                 | Via `@module-federation/nextjs-mf`                                  | Via `@module-federation/nextjs-mf`                 | Built-in SSR                                                   |
+| **Next.js** (Turbopack)                    | **No MF support**                                                   | **No MF support**                                  | N/A                                                            |
 
-**Key finding**: Vite cannot be used as a consumer if any producers use webpack or rspack. The shared scope protocol (`__webpack_share_scopes__`) is not implemented in Vite's runtime. This applies to both SPA and SSR consumers.
+**Key finding**: Vite has no `__webpack_share_scopes__`, so a Vite consumer cannot rely on a bundler plugin to negotiate shared modules with webpack or rspack producers. Using `@module-federation/runtime` directly and passing React in as `shared.lib` works around that.
 
-**Recommended consumer bundler**: rspack with native v1.5 (`@rspack/core.container.ModuleFederationPlugin`). It gives you webpack v1 compatibility with rspack's build speed. Upgrade to `@module-federation/enhanced` only after all producers are also on v2.
+**Consumer bundler used here**: rspack with `@module-federation/enhanced`. It consumes the MF 2 producers through `mf-manifest.json` and the native v1 webpack producer through its plain remote entry, with remotes registered at runtime (`registerRemotes`), so the v1/v2 mix works without a native v1.5 consumer. Rspack's built-in v1.5 plugin remains the lowest-risk choice if every producer is v1.
 
 ## Recommendation for migration
 
@@ -151,4 +152,4 @@ The consumer (shell) has stricter requirements than producers because it control
 3. **Migrate producers to rspack** — minimal config changes, massive build speed improvement, no dev mode issues
 4. **Upgrade consumer + producers to MF v2** (`@module-federation/enhanced`) once all producers are migrated — unlocks manifests, type hints, devtools
 5. **Migrate producers to vite last** (if at all) — only when comfortable with build+preview dev workflow. Consumer stays on rspack.
-6. **SSR**: Use Next.js (webpack mode) with `@module-federation/nextjs-mf`, or custom rspack SSR. Avoid Vite-based SSR frameworks for federation consumers.
+6. **SSR**: Use Next.js (webpack mode) with `@module-federation/nextjs-mf`, or custom rspack SSR. Vite-based SSR (React Router 7) works for client-only remote islands in dev, as in `portal-shell-ssr`, but remote content is not server-rendered.

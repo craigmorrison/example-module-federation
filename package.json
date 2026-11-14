@@ -1,15 +1,14 @@
 {
   "name": "example-module-federation",
   "version": "1.0.0",
+  "private": true,
   "description": "Cross-bundler Module Federation proof of concept (Webpack, Rspack, Vite)",
-  "repository": "https://github.com/craigmorrison/example-module-federation.git",
-  "author": "Craig Morrison",
   "license": "MIT",
-  "packageManager": "npm@12.2.0",
+  "author": "Craig Morrison",
+  "repository": "https://github.com/craigmorrison/example-module-federation.git",
   "workspaces": [
     "packages/*"
   ],
-  "private": true,
   "scripts": {
     "dev": "turbo run dev --filter=!portal-shell-ssr",
     "dev:ssr": "turbo run dev --filter=!portal-shell & turbo run dev --filter=portal-shell-ssr",
@@ -17,44 +16,34 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "turbo run lint",
-    "format": "turbo run format"
+    "format": "turbo run format",
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@module-federation/enhanced": "^2.9.3",
+    "@module-federation/vite": "^1.24.0",
+    "@playwright/test": "^1.65.1",
+    "@rspack/cli": "^2.3.2",
+    "@rspack/core": "^2.3.2",
+    "@rspack/dev-server": "^2.2.2",
+    "@swc/core": "^1.16.22",
+    "@vitejs/plugin-react": "^6.3.0",
+    "html-webpack-plugin": "^5.6.8",
+    "jsdom": "^31.0.1",
+    "oxfmt": "^0.78.0",
+    "oxlint": "^1.93.0",
+    "swc-loader": "^0.2.7",
+    "turbo": "^2.11.11",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.8",
+    "vitest": "^5.1.0",
+    "webpack": "^5.112.2",
+    "webpack-cli": "^7.3.1",
+    "webpack-dev-server": "^6.1.0"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": "oxlint --fix",
     "*.{js,jsx,ts,tsx,css,md,json}": "oxfmt"
   },
-  "overrides": {
-    "defu": ">=6.1.5",
-    "axios": ">=1.15.0",
-    "uuid": ">=11.1.1",
-    "ws": ">=8.21.0",
-    "esbuild": ">=0.28.1",
-    "adm-zip": "0.6.1",
-    "undici@7": "7.30.1",
-    "undici@8": "8.12.2",
-    "fast-uri@3": "3.1.9",
-    "qs@6": "6.16.1"
-  },
-  "devDependencies": {
-    "@module-federation/enhanced": "^2.9.1",
-    "@module-federation/vite": "^1.23.4",
-    "@rspack/cli": "^2.2.7",
-    "@rspack/core": "^2.2.7",
-    "@swc/core": "^1.16.18",
-    "@swc/plugin-emotion": "^20.0.2",
-    "@vitejs/plugin-react": "^6.1.1",
-    "html-webpack-plugin": "^5.6.8",
-    "jsdom": "^31.0.1",
-    "oxfmt": "^0.78.0",
-    "oxlint": "^1.85.0",
-    "react-router": "^8.4.0",
-    "swc-loader": "^0.2.7",
-    "turbo": "^2.11.4",
-    "typescript": "^7.0.2",
-    "vite": "^8.3.1",
-    "vitest": "^5.0.3",
-    "webpack": "^5.111.1",
-    "webpack-cli": "^7.2.3",
-    "webpack-dev-server": "^6.0.0"
-  }
+  "packageManager": "npm@12.2.0"
 }

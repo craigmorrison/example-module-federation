@@ -1,10 +1,12 @@
-import { defineConfig } from 'vitest/config';
+import { configDefaults, defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
-    environment: 'jsdom',
+    environment: "jsdom",
     globals: true,
-    include: ['packages/*/src/**/*.{test,spec}.{ts,tsx,js,jsx}'],
-    passWithNoTests: true
-  }
+    include: ["packages/*/src/**/*.{test,spec}.{ts,tsx,js,jsx}"],
+    // Playwright specs live in e2e/ and run with `npm run test:e2e`.
+    exclude: [...configDefaults.exclude, "e2e/**"],
+    passWithNoTests: true,
+  },
 });
