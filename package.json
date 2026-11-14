@@ -16,11 +16,13 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "turbo run lint",
-    "format": "turbo run format"
+    "format": "turbo run format",
+    "test:e2e": "playwright test"
   },
   "devDependencies": {
     "@module-federation/enhanced": "^2.9.3",
     "@module-federation/vite": "^1.24.0",
+    "@playwright/test": "^1.65.1",
     "@rspack/cli": "^2.3.2",
     "@rspack/core": "^2.3.2",
     "@rspack/dev-server": "^2.2.2",
