@@ -111,8 +111,9 @@ npm run build         # All packages (each uses its own bundler, in production m
 ```shell
 npm test                 # Vitest (unit tests)
 npm run test:e2e         # Playwright smoke test (starts all dev servers; local only, not in CI)
-npx oxlint .             # Lint
-npx oxfmt --check .      # Format check
+npm run lint             # Lint (oxlint)
+npm run format:check     # Format check (oxfmt)
+npm run format           # Format all files (oxfmt)
 ```
 
 The e2e test visits `/table`, `/counter` and `/people` and checks each remote renders (the people remote's SWAPI call is served from a fixture), and checks that the shell keeps working and shows a fallback with a Retry button when one remote is unreachable. It needs ports 3000 to 3003 free (or already serving the dev servers) and a one-off `npx playwright install chromium`.

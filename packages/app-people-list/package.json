@@ -14,9 +14,7 @@
   "scripts": {
     "dev": "tsc && vite build -c ./vite.config.js && vite preview -c ./vite.config.js --port 3003 --strictPort",
     "build": "tsc && vite build -c ./vite.config.js",
-    "test": "vitest run",
-    "lint": "oxlint --fix .",
-    "format": "oxfmt ."
+    "test": "vitest run"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

@@ -16,8 +16,9 @@
     "build": "turbo run build",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "turbo run lint",
-    "format": "turbo run format",
+    "lint": "oxlint .",
+    "format": "oxfmt .",
+    "format:check": "oxfmt --check .",
     "test:e2e": "playwright test"
   },
   "devDependencies": {
