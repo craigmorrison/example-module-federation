@@ -15,6 +15,7 @@ npm-debug.log*
 .swc
 .turbo
 .vite
+.react-router
 
 # OS Generated Files
 .DS_Store

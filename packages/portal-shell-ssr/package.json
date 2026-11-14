@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "react-router dev --port 4000",
     "build": "react-router build",
+    "typecheck": "react-router typegen && tsc --noEmit",
     "start": "react-router-serve ./build/server/index.js"
   },
   "dependencies": {
