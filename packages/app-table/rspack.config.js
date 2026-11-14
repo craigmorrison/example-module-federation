@@ -35,6 +35,7 @@ module.exports = {
   },
   output: {
     filename: "table.js",
+    publicPath: "auto",
     path: path.resolve(__dirname, "dist"),
     clean: true,
   },
