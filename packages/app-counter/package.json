@@ -9,9 +9,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "webpack-cli serve --mode development -c ./webpack.config.js",
-    "dev:webpack": "webpack-cli serve -c ./webpack.config.js",
-    "build": "webpack --mode production -c ./webpack.config.js",
-    "build:webpack": "webpack --mode production -c ./webpack.config.js"
+    "build": "webpack --mode production -c ./webpack.config.js"
   },
   "dependencies": {
     "react": "^19.3.1",

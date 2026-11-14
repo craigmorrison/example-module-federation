@@ -5,24 +5,19 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  build:
+  check:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        bundler: [webpack, rspack, vite]
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
-        with:
-          node-version-file: ".nvmrc"
-          cache: "npm"
-      - run: npm ci
-      - run: npx turbo run build:${{ matrix.bundler }}
-
-  lint:
-    runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
@@ -31,25 +26,8 @@ jobs:
           cache: "npm"
       - run: npm ci
       - run: npx oxlint .
-
-  typecheck:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
-        with:
-          node-version-file: ".nvmrc"
-          cache: "npm"
-      - run: npm ci
+      - run: npx oxfmt --check .
       - run: npx tsc --noEmit -p packages/app-people-list/tsconfig.json
-
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
-        with:
-          node-version-file: ".nvmrc"
-          cache: "npm"
-      - run: npm ci
+      - run: npm run typecheck -w portal-shell-ssr
       - run: npm test
+      - run: npx turbo run build
