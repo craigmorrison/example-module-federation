@@ -2,7 +2,7 @@
   "name": "portal-shell",
   "version": "1.0.0",
   "private": true,
-  "description": "Consumer application for the federated portal (rspack, MF v1.5)",
+  "description": "Consumer application for the federated portal (rspack, MF 2 via @module-federation/enhanced)",
   "license": "MIT",
   "author": "Craig Morrison",
   "repository": "https://github.com/craigmorrison/example-module-federation.git",

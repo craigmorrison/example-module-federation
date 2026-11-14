@@ -149,6 +149,8 @@ const { ModuleFederationPlugin } = require("@module-federation/enhanced/rspack")
 | **Shared scope**        | `__webpack_share_scopes__` (same as webpack)      | Patched version with v2 runtime SDK                                  |
 | **Build speed**         | 10-20x faster than webpack                        | Same (rspack under the hood)                                         |
 
+> **Update**: in this repo the shell uses `@module-federation/enhanced` and loads the v1 `app-counter` from its plain `counter-remote-entry.js` while loading the v2 producers from `mf-manifest.json`. Both kinds are registered at runtime with `registerRemotes` (an entry ending in `.json` is a manifest, anything else is a remote entry script), and the e2e test passes. The failure described below needs a v1 producer to be addressed as if it had a manifest.
+
 ### The manifest incompatibility
 
 `@module-federation/enhanced` on rspack produces `mf-manifest.json` files by default. When the consumer is also on v2, this works. But when v1 producers don't generate manifests, the v2 consumer's runtime may fail to fall back gracefully — it expects a manifest and gets a 404 or an HTML page.
