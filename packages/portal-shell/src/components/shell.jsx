@@ -1,10 +1,11 @@
 import Header from "./header";
+import { lazyRemote } from "../remotes";
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router";
 
-const Table = React.lazy(() => import("table/Table"));
-const Counter = React.lazy(() => import("counter/Counter"));
-const People = React.lazy(() => import("people/People"));
+const Table = lazyRemote("table/Table");
+const Counter = lazyRemote("counter/Counter");
+const People = lazyRemote("people/People");
 
 function Home() {
   return (

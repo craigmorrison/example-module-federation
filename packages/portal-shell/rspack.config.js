@@ -43,16 +43,11 @@ module.exports = {
   },
   plugins: [
     new rspack.HtmlRspackPlugin({ template: "./static/index.html" }),
+    // Runtime remotes config, edit or replace it per environment (see README).
+    new rspack.CopyRspackPlugin({ patterns: [{ from: "static/remotes.json" }] }),
     new ModuleFederationPlugin({
       name: "shell",
       filename: "remoteEntry.js",
-      remotes: {
-        // MF 2 producers publish an mf-manifest.json, which the runtime prefers.
-        table: "table@http://localhost:3001/mf-manifest.json",
-        // app-counter is native webpack MF v1: no manifest, so use its remote entry.
-        counter: "counter@http://localhost:3002/counter-remote-entry.js",
-        people: "people@http://localhost:3003/mf-manifest.json",
-      },
       shared: {
         react: { eager: true, singleton: true, requiredVersion: federationDeps.react },
         "react-dom": { eager: true, singleton: true, requiredVersion: federationDeps["react-dom"] },
