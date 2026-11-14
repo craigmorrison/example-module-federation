@@ -5,7 +5,7 @@ const federationDeps = require("./package.json").dependencies;
 
 /** @type {import('@rspack/core').Configuration} */
 module.exports = {
-  entry: "./src/app.js",
+  entry: "./src/bootstrap.jsx",
   devServer: {
     static: path.join(__dirname, "dist"),
     port: 3000,
@@ -48,9 +48,10 @@ module.exports = {
     new ModuleFederationPlugin({
       name: "shell",
       filename: "remoteEntry.js",
+      experiments: { asyncStartup: true },
       shared: {
-        react: { eager: true, singleton: true, requiredVersion: federationDeps.react },
-        "react-dom": { eager: true, singleton: true, requiredVersion: federationDeps["react-dom"] },
+        react: { singleton: true, requiredVersion: federationDeps.react },
+        "react-dom": { singleton: true, requiredVersion: federationDeps["react-dom"] },
       },
     }),
   ],

@@ -47,6 +47,8 @@ There are two valid migration orders. Which one you use depends on your shared m
 | `false`  | `true`   | Producer's copy is available synchronously but the consumer hasn't initialised the shared scope yet. **Can cause load-order failures** — the producer's eager copy may not register in time. |
 | `false`  | `false`  | Both copies load async. Requires the bootstrap pattern on both sides. Standard MF v1 setup. Works in v1→v2 migration as long as both sides have the async boundary.                          |
 
+> **Do not set `eager: true` on producers.** An eager shared module is bundled into the producer's remote entry, so every remote ships its own full copy of React and react-dom whether or not the shared scope picks it. This repo's producers and shell are all non-eager. Use the async boundary instead: the bootstrap pattern (webpack, MF v1) or `experiments: { asyncStartup: true }` (MF 2, see below).
+
 **Key point**: `eager` is a build-time decision that changes the webpack chunk graph. It cannot be negotiated at runtime. Changing it during migration changes how chunks are structured and can break other producers that depend on the loading order.
 
 **Cross-bundler note**: `eager` has no meaning in Vite's dev server (native ESM). `@module-federation/vite` handles shared modules differently during `vite dev` vs production builds. The config is honoured in production.
@@ -233,6 +235,8 @@ Rspack uses `builtin:swc-loader` instead of `swc-loader` but this only affects b
 
 ## The async bootstrap pattern
 
+> **MF 2 alternative: `asyncStartup`.** With `@module-federation/enhanced` you can set `experiments: { asyncStartup: true }` on the plugin and point the entry straight at the real entry file (`src/bootstrap.jsx`), with no `app.js` -> `import('./bootstrap')` indirection. The plugin makes the entry wait for shared-scope negotiation itself. `portal-shell` and `app-table` do this. `app-counter` is native webpack MF v1, which has no such option, so it keeps the bootstrap pattern below.
+
 Every producer entry point must follow this pattern for shared modules to resolve correctly:
 
 ```js
@@ -258,7 +262,8 @@ The dynamic `import()` creates an async chunk boundary. When webpack/rspack enco
 
 ### When you can skip it
 
-- **`eager: true` on all shared modules in all packages**: The modules are bundled into the entry chunk, so no async resolution is needed. But this increases bundle size and makes shared scope negotiation less flexible.
+- **MF 2 with `asyncStartup: true`**: the plugin adds the async boundary for you.
+- **`eager: true` on all shared modules in all packages**: The modules are bundled into the entry chunk, so no async resolution is needed. But every remote then carries its own copy of React, which defeats sharing, so avoid it.
 - **Vite in dev mode**: `@module-federation/vite` handles the async boundary internally. But you still need the pattern for webpack/rspack compatibility.
 
 ### Common mistakes
@@ -277,12 +282,12 @@ The dynamic `import()` creates an async chunk boundary. When webpack/rspack enco
 
 ```js
 shared: {
-  react: { eager: true, singleton: true, requiredVersion: deps.react },
-  'react-dom': { eager: true, singleton: true, requiredVersion: deps['react-dom'] }
+  react: { singleton: true, requiredVersion: deps.react },
+  'react-dom': { singleton: true, requiredVersion: deps['react-dom'] }
 }
 ```
 
-Use `eager: true` for core framework deps (React, react-dom). Use `eager: false` for larger optional deps (design systems, data fetching libraries) to keep bundle sizes down.
+Keep `eager` off (the default) and rely on the async boundary (`asyncStartup` on MF 2, the bootstrap pattern on v1). Eager shared modules are bundled into each entry, so every remote would carry its own React.
 
 ### For v1 → v2 migration
 

@@ -6,8 +6,10 @@ module.exports = {
   exposes: {
     "./Table": "./src/components/table.jsx",
   },
+  // MF 2 replaces the app.js -> import('./bootstrap') indirection with async startup.
+  experiments: { asyncStartup: true },
   shared: {
-    react: { eager: true, singleton: true, requiredVersion: deps.react },
-    "react-dom": { eager: true, singleton: true, requiredVersion: deps["react-dom"] },
+    react: { singleton: true, requiredVersion: deps.react },
+    "react-dom": { singleton: true, requiredVersion: deps["react-dom"] },
   },
 };

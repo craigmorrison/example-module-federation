@@ -47,8 +47,8 @@ module.exports = {
         "./Counter": "./src/components/counter.jsx",
       },
       shared: {
-        react: { eager: true, singleton: true, requiredVersion: deps.react },
-        "react-dom": { eager: true, singleton: true, requiredVersion: deps["react-dom"] },
+        react: { singleton: true, requiredVersion: deps.react },
+        "react-dom": { singleton: true, requiredVersion: deps["react-dom"] },
       },
     }),
   ],

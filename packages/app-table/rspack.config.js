@@ -4,7 +4,7 @@ const federationConfig = require("./federation.config");
 
 /** @type {import('@rspack/core').Configuration} */
 module.exports = {
-  entry: "./src/app.js",
+  entry: "./src/bootstrap.jsx",
   devServer: {
     static: path.join(__dirname, "dist"),
     port: 3001,
