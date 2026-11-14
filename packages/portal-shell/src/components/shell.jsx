@@ -35,9 +35,18 @@ function Shell() {
 
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/table" element={<RemoteBoundary id="table/Table" name="Table" />} />
-        <Route path="/counter" element={<RemoteBoundary id="counter/Counter" name="Counter" />} />
-        <Route path="/people" element={<RemoteBoundary id="people/People" name="People" />} />
+        <Route
+          path="/table"
+          element={<RemoteBoundary key="table/Table" id="table/Table" name="Table" />}
+        />
+        <Route
+          path="/counter"
+          element={<RemoteBoundary key="counter/Counter" id="counter/Counter" name="Counter" />}
+        />
+        <Route
+          path="/people"
+          element={<RemoteBoundary key="people/People" id="people/People" name="People" />}
+        />
       </Routes>
     </Router>
   );

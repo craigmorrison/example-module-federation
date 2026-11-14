@@ -48,6 +48,9 @@ module.exports = {
     new ModuleFederationPlugin({
       name: "shell",
       filename: "remoteEntry.js",
+      // The default (version-first) loads every remote's entry before any module, so one
+      // unreachable remote would break them all. loaded-first resolves shared deps lazily.
+      shareStrategy: "loaded-first",
       experiments: { asyncStartup: true },
       shared: {
         react: { singleton: true, requiredVersion: federationDeps.react },
