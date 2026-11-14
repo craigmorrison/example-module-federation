@@ -1,15 +1,14 @@
 {
   "name": "example-module-federation",
   "version": "1.0.0",
+  "private": true,
   "description": "Cross-bundler Module Federation proof of concept (Webpack, Rspack, Vite)",
-  "repository": "https://github.com/craigmorrison/example-module-federation.git",
-  "author": "Craig Morrison",
   "license": "MIT",
-  "packageManager": "npm@11.14.1",
+  "author": "Craig Morrison",
+  "repository": "https://github.com/craigmorrison/example-module-federation.git",
   "workspaces": [
     "packages/*"
   ],
-  "private": true,
   "scripts": {
     "dev": "turbo run dev --filter=!portal-shell-ssr",
     "dev:ssr": "turbo run dev --filter=!portal-shell & turbo run dev --filter=portal-shell-ssr",
@@ -18,17 +17,6 @@
     "test:watch": "vitest",
     "lint": "turbo run lint",
     "format": "turbo run format"
-  },
-  "lint-staged": {
-    "*.{js,jsx,ts,tsx}": "oxlint --fix",
-    "*.{js,jsx,ts,tsx,css,md,json}": "oxfmt"
-  },
-  "overrides": {
-    "defu": ">=6.1.5",
-    "axios": ">=1.15.0",
-    "uuid": ">=11.1.1",
-    "ws": ">=8.21.0",
-    "esbuild": ">=0.28.1"
   },
   "devDependencies": {
     "@module-federation/enhanced": "^2.9.3",
@@ -49,5 +37,17 @@
     "webpack": "^5.112.2",
     "webpack-cli": "^7.3.1",
     "webpack-dev-server": "^5.2.7"
-  }
+  },
+  "overrides": {
+    "axios": ">=1.15.0",
+    "defu": ">=6.1.5",
+    "esbuild": ">=0.28.1",
+    "uuid": ">=11.1.1",
+    "ws": ">=8.21.0"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": "oxlint --fix",
+    "*.{js,jsx,ts,tsx,css,md,json}": "oxfmt"
+  },
+  "packageManager": "npm@11.14.1"
 }

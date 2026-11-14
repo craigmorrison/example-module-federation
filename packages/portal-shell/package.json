@@ -1,12 +1,12 @@
 {
   "name": "portal-shell",
   "version": "1.0.0",
-  "description": "Consumer application for the federated portal (rspack, MF v1.5)",
-  "main": "index.js",
-  "repository": "https://github.com/craigmorrison/example-module-federation.git",
-  "author": "Craig Morrison",
-  "license": "MIT",
   "private": true,
+  "description": "Consumer application for the federated portal (rspack, MF v1.5)",
+  "license": "MIT",
+  "author": "Craig Morrison",
+  "repository": "https://github.com/craigmorrison/example-module-federation.git",
+  "main": "index.js",
   "scripts": {
     "dev": "rspack serve --mode development -c ./rspack.config.js",
     "build": "rspack build --mode production -c ./rspack.config.js"

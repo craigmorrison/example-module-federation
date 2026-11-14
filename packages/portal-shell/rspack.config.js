@@ -1,17 +1,17 @@
-const path = require('path');
-const rspack = require('@rspack/core');
-const federationDeps = require('./package.json').dependencies;
+const path = require("path");
+const rspack = require("@rspack/core");
+const federationDeps = require("./package.json").dependencies;
 
 /** @type {import('@rspack/core').Configuration} */
 module.exports = {
-  entry: './src/app.js',
+  entry: "./src/app.js",
   devServer: {
-    static: path.join(__dirname, 'dist'),
+    static: path.join(__dirname, "dist"),
     port: 3000,
     historyApiFallback: true,
     headers: {
-      'Access-Control-Allow-Origin': '*'
-    }
+      "Access-Control-Allow-Origin": "*",
+    },
   },
   module: {
     rules: [
@@ -19,40 +19,40 @@ module.exports = {
         test: /\.m?jsx?$/,
         exclude: /node_modules/,
         use: {
-          loader: 'builtin:swc-loader',
+          loader: "builtin:swc-loader",
           options: {
             jsc: {
-              parser: { syntax: 'ecmascript', jsx: true },
-              transform: { react: { runtime: 'automatic' } }
-            }
-          }
-        }
-      }
-    ]
+              parser: { syntax: "ecmascript", jsx: true },
+              transform: { react: { runtime: "automatic" } },
+            },
+          },
+        },
+      },
+    ],
   },
   resolve: {
-    extensions: ['.js', '.jsx']
+    extensions: [".js", ".jsx"],
   },
   output: {
-    filename: 'portal.js',
-    path: path.resolve(__dirname, 'dist'),
-    crossOriginLoading: 'anonymous',
-    clean: true
+    filename: "portal.js",
+    path: path.resolve(__dirname, "dist"),
+    crossOriginLoading: "anonymous",
+    clean: true,
   },
   plugins: [
-    new rspack.HtmlRspackPlugin({ template: './static/index.html' }),
+    new rspack.HtmlRspackPlugin({ template: "./static/index.html" }),
     new rspack.container.ModuleFederationPlugin({
-      name: 'shell',
-      filename: 'remoteEntry.js',
+      name: "shell",
+      filename: "remoteEntry.js",
       remotes: {
-        table: 'table@http://localhost:3001/table-remote-entry.js',
-        counter: 'counter@http://localhost:3002/counter-remote-entry.js',
-        people: 'people@http://localhost:3003/people-remote-entry.js'
+        table: "table@http://localhost:3001/table-remote-entry.js",
+        counter: "counter@http://localhost:3002/counter-remote-entry.js",
+        people: "people@http://localhost:3003/people-remote-entry.js",
       },
       shared: {
         react: { eager: true, singleton: true, requiredVersion: federationDeps.react },
-        'react-dom': { eager: true, singleton: true, requiredVersion: federationDeps['react-dom'] }
-      }
-    })
-  ]
+        "react-dom": { eager: true, singleton: true, requiredVersion: federationDeps["react-dom"] },
+      },
+    }),
+  ],
 };

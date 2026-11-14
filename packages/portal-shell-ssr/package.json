@@ -1,8 +1,8 @@
 {
   "name": "portal-shell-ssr",
   "version": "1.0.0",
-  "description": "SSR host application for the federated portal (React Router 7 framework mode)",
   "private": true,
+  "description": "SSR host application for the federated portal (React Router 7 framework mode)",
   "type": "module",
   "scripts": {
     "dev": "react-router dev --port 4000",

@@ -1,4 +1,4 @@
-import { createRoot } from 'react-dom/client';
-import Shell from './components/shell';
+import { createRoot } from "react-dom/client";
+import Shell from "./components/shell";
 
-createRoot(document.getElementById('portal-app')).render(<Shell />);
+createRoot(document.getElementById("portal-app")).render(<Shell />);

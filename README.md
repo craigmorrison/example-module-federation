@@ -40,18 +40,18 @@ Three producers, three different bundlers, one consumer that fetches `remoteEntr
 
 ## Stack
 
-| Tool | Purpose |
-|---|---|
-| [Module Federation v2](https://module-federation.io/) | Micro-frontend runtime (cross-bundler) |
-| [Rspack](https://rspack.rs/) | Consumer bundler + producer (app-table) |
-| [Webpack 5](https://webpack.js.org/) | Legacy producer bundler (app-counter) |
-| [Vite 8](https://vite.dev/) | Producer bundler (app-people-list) + SSR consumer |
-| [SWC](https://swc.rs/) | Transpiler (replaces Babel) |
-| [React 19](https://react.dev/) | UI framework |
-| [React Router 7](https://reactrouter.com/) | Routing (SSR consumer uses framework mode) |
-| [Turborepo](https://turbo.build/) | Monorepo task runner |
-| [Vitest](https://vitest.dev/) | Test runner |
-| [oxlint](https://oxc.rs/) + [oxfmt](https://oxc.rs/) | Linter + formatter |
+| Tool                                                  | Purpose                                           |
+| ----------------------------------------------------- | ------------------------------------------------- |
+| [Module Federation v2](https://module-federation.io/) | Micro-frontend runtime (cross-bundler)            |
+| [Rspack](https://rspack.rs/)                          | Consumer bundler + producer (app-table)           |
+| [Webpack 5](https://webpack.js.org/)                  | Legacy producer bundler (app-counter)             |
+| [Vite 8](https://vite.dev/)                           | Producer bundler (app-people-list) + SSR consumer |
+| [SWC](https://swc.rs/)                                | Transpiler (replaces Babel)                       |
+| [React 19](https://react.dev/)                        | UI framework                                      |
+| [React Router 7](https://reactrouter.com/)            | Routing (SSR consumer uses framework mode)        |
+| [Turborepo](https://turbo.build/)                     | Monorepo task runner                              |
+| [Vitest](https://vitest.dev/)                         | Test runner                                       |
+| [oxlint](https://oxc.rs/) + [oxfmt](https://oxc.rs/)  | Linter + formatter                                |
 
 ## Requirements
 

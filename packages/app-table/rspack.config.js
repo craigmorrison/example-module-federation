@@ -1,17 +1,17 @@
-const path = require('path');
-const { ModuleFederationPlugin } = require('@module-federation/enhanced/rspack');
-const federationConfig = require('./federation.config');
+const path = require("path");
+const { ModuleFederationPlugin } = require("@module-federation/enhanced/rspack");
+const federationConfig = require("./federation.config");
 
 /** @type {import('@rspack/core').Configuration} */
 module.exports = {
-  entry: './src/app.js',
+  entry: "./src/app.js",
   devServer: {
-    static: path.join(__dirname, 'dist'),
+    static: path.join(__dirname, "dist"),
     port: 3001,
     historyApiFallback: true,
     headers: {
-      'Access-Control-Allow-Origin': '*'
-    }
+      "Access-Control-Allow-Origin": "*",
+    },
   },
   module: {
     rules: [
@@ -19,29 +19,29 @@ module.exports = {
         test: /\.m?jsx?$/,
         exclude: /node_modules/,
         use: {
-          loader: 'builtin:swc-loader',
+          loader: "builtin:swc-loader",
           options: {
             jsc: {
-              parser: { syntax: 'ecmascript', jsx: true },
-              transform: { react: { runtime: 'automatic' } }
-            }
-          }
-        }
-      }
-    ]
+              parser: { syntax: "ecmascript", jsx: true },
+              transform: { react: { runtime: "automatic" } },
+            },
+          },
+        },
+      },
+    ],
   },
   resolve: {
-    extensions: ['.js', '.jsx']
+    extensions: [".js", ".jsx"],
   },
   output: {
-    filename: 'table.js',
-    path: path.resolve(__dirname, 'dist'),
-    clean: true
+    filename: "table.js",
+    path: path.resolve(__dirname, "dist"),
+    clean: true,
   },
   plugins: [
-    new (require('@rspack/core')).HtmlRspackPlugin({
-      template: './static/index.html'
+    new (require("@rspack/core").HtmlRspackPlugin)({
+      template: "./static/index.html",
     }),
-    new ModuleFederationPlugin(federationConfig)
-  ]
+    new ModuleFederationPlugin(federationConfig),
+  ],
 };

@@ -1,11 +1,11 @@
-import { lazy, Suspense, useEffect, useState, type ComponentType } from 'react';
-import { loadRemote } from '@module-federation/runtime';
+import { lazy, Suspense, useEffect, useState, type ComponentType } from "react";
+import { loadRemote } from "@module-federation/runtime";
 
 const remoteCache = new Map<string, ComponentType>();
 
 function useFederatedComponent(remote: string) {
   const [Component, setComponent] = useState<ComponentType | null>(
-    () => remoteCache.get(remote) ?? null
+    () => remoteCache.get(remote) ?? null,
   );
   const [error, setError] = useState<Error | null>(null);
 
@@ -36,7 +36,7 @@ interface FederatedRemoteProps {
 
 export function FederatedRemote({
   remote,
-  fallback = <div className="loading-placeholder">Loading...</div>
+  fallback = <div className="loading-placeholder">Loading...</div>,
 }: FederatedRemoteProps) {
   const [mounted, setMounted] = useState(false);
 
@@ -59,7 +59,11 @@ function RemoteLoader({ remote }: { remote: string }) {
   const { Component, error } = useFederatedComponent(remote);
 
   if (error) {
-    return <div className="loading-placeholder">Failed to load {remote}: {error.message}</div>;
+    return (
+      <div className="loading-placeholder">
+        Failed to load {remote}: {error.message}
+      </div>
+    );
   }
 
   if (!Component) {

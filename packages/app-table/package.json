@@ -1,12 +1,12 @@
 {
   "name": "app-table",
   "version": "1.0.0",
-  "description": "Producer that renders a table (MF v2, rspack)",
-  "main": "index.js",
-  "repository": "https://github.com/craigmorrison/example-module-federation.git",
-  "author": "Craig Morrison",
-  "license": "MIT",
   "private": true,
+  "description": "Producer that renders a table (MF v2, rspack)",
+  "license": "MIT",
+  "author": "Craig Morrison",
+  "repository": "https://github.com/craigmorrison/example-module-federation.git",
+  "main": "index.js",
   "scripts": {
     "dev": "rspack serve --mode development -c ./rspack.config.js",
     "dev:rspack": "rspack serve -c ./rspack.config.js",

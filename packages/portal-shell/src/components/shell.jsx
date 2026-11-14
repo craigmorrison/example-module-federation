@@ -1,10 +1,10 @@
-import Header from './header';
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import Header from "./header";
+import React from "react";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 
-const Table = React.lazy(() => import('table/Table'));
-const Counter = React.lazy(() => import('counter/Counter'));
-const People = React.lazy(() => import('people/People'));
+const Table = React.lazy(() => import("table/Table"));
+const Counter = React.lazy(() => import("counter/Counter"));
+const People = React.lazy(() => import("people/People"));
 
 function Home() {
   return (

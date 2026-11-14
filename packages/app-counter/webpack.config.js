@@ -1,17 +1,17 @@
-const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const { ModuleFederationPlugin } = require('webpack').container;
-const deps = require('./package.json').dependencies;
+const path = require("path");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const { ModuleFederationPlugin } = require("webpack").container;
+const deps = require("./package.json").dependencies;
 
 module.exports = {
-  entry: './src/app.js',
+  entry: "./src/app.js",
   devServer: {
-    static: path.join(__dirname, 'dist'),
+    static: path.join(__dirname, "dist"),
     port: 3002,
     historyApiFallback: true,
     headers: {
-      'Access-Control-Allow-Origin': '*'
-    }
+      "Access-Control-Allow-Origin": "*",
+    },
   },
   module: {
     rules: [
@@ -19,37 +19,37 @@ module.exports = {
         test: /\.m?jsx?$/,
         exclude: /node_modules/,
         use: {
-          loader: 'swc-loader',
+          loader: "swc-loader",
           options: {
             jsc: {
-              parser: { syntax: 'ecmascript', jsx: true },
-              transform: { react: { runtime: 'automatic' } }
-            }
-          }
-        }
-      }
-    ]
+              parser: { syntax: "ecmascript", jsx: true },
+              transform: { react: { runtime: "automatic" } },
+            },
+          },
+        },
+      },
+    ],
   },
   resolve: {
-    extensions: ['.js', '.jsx']
+    extensions: [".js", ".jsx"],
   },
   output: {
-    filename: 'counter.js',
-    path: path.resolve(__dirname, 'dist'),
-    clean: true
+    filename: "counter.js",
+    path: path.resolve(__dirname, "dist"),
+    clean: true,
   },
   plugins: [
-    new HtmlWebpackPlugin({ template: './static/index.html' }),
+    new HtmlWebpackPlugin({ template: "./static/index.html" }),
     new ModuleFederationPlugin({
-      name: 'counter',
-      filename: 'counter-remote-entry.js',
+      name: "counter",
+      filename: "counter-remote-entry.js",
       exposes: {
-        './Counter': './src/components/counter.jsx'
+        "./Counter": "./src/components/counter.jsx",
       },
       shared: {
         react: { eager: true, singleton: true, requiredVersion: deps.react },
-        'react-dom': { eager: true, singleton: true, requiredVersion: deps['react-dom'] }
-      }
-    })
-  ]
+        "react-dom": { eager: true, singleton: true, requiredVersion: deps["react-dom"] },
+      },
+    }),
+  ],
 };
