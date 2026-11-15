@@ -1,12 +1,13 @@
-const path = require("path");
-const { ModuleFederationPlugin } = require("@module-federation/enhanced/rspack");
-const federationConfig = require("./federation.config");
+import path from "node:path";
+import { HtmlRspackPlugin } from "@rspack/core";
+import { ModuleFederationPlugin } from "@module-federation/enhanced/rspack";
+import federationConfig from "./federation.config.js";
 
 /** @type {import('@rspack/core').Configuration} */
-module.exports = {
+export default {
   entry: "./src/bootstrap.jsx",
   devServer: {
-    static: path.join(__dirname, "dist"),
+    static: path.join(import.meta.dirname, "dist"),
     port: 3001,
     historyApiFallback: true,
     headers: {
@@ -36,11 +37,11 @@ module.exports = {
   output: {
     filename: "table.js",
     publicPath: "auto",
-    path: path.resolve(__dirname, "dist"),
+    path: path.resolve(import.meta.dirname, "dist"),
     clean: true,
   },
   plugins: [
-    new (require("@rspack/core").HtmlRspackPlugin)({
+    new HtmlRspackPlugin({
       template: "./static/index.html",
     }),
     new ModuleFederationPlugin(federationConfig),

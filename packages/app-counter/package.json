@@ -6,7 +6,7 @@
   "license": "MIT",
   "author": "Craig Morrison",
   "repository": "https://github.com/craigmorrison/example-module-federation.git",
-  "main": "index.js",
+  "type": "module",
   "scripts": {
     "dev": "webpack-cli serve --mode development -c ./webpack.config.js",
     "build": "webpack --mode production -c ./webpack.config.js"

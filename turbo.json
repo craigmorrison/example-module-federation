@@ -10,8 +10,6 @@
     },
     "test": {
       "cache": false
-    },
-    "lint": {},
-    "format": {}
+    }
   }
 }

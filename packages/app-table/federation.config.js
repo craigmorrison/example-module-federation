@@ -1,6 +1,8 @@
-const deps = require("./package.json").dependencies;
+import pkg from "./package.json" with { type: "json" };
 
-module.exports = {
+const deps = pkg.dependencies;
+
+export default {
   name: "table",
   filename: "table-remote-entry.js",
   exposes: {

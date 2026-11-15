@@ -1,13 +1,15 @@
-const path = require("path");
-const rspack = require("@rspack/core");
-const { ModuleFederationPlugin } = require("@module-federation/enhanced/rspack");
-const federationDeps = require("./package.json").dependencies;
+import path from "node:path";
+import rspack from "@rspack/core";
+import { ModuleFederationPlugin } from "@module-federation/enhanced/rspack";
+import pkg from "./package.json" with { type: "json" };
+
+const federationDeps = pkg.dependencies;
 
 /** @type {import('@rspack/core').Configuration} */
-module.exports = {
+export default {
   entry: "./src/bootstrap.jsx",
   devServer: {
-    static: path.join(__dirname, "dist"),
+    static: path.join(import.meta.dirname, "dist"),
     port: 3000,
     historyApiFallback: true,
     headers: {
@@ -37,7 +39,7 @@ module.exports = {
   output: {
     filename: "portal.js",
     publicPath: "auto",
-    path: path.resolve(__dirname, "dist"),
+    path: path.resolve(import.meta.dirname, "dist"),
     crossOriginLoading: "anonymous",
     clean: true,
   },

@@ -26,7 +26,7 @@ jobs:
           cache: "npm"
       - run: npm ci
       - run: npx oxlint .
-      - run: npx oxfmt --check .
+      - run: npm run format:check
       - run: npx tsc --noEmit -p packages/app-people-list/tsconfig.json
       - run: npm run typecheck -w portal-shell-ssr
       - run: npm test
