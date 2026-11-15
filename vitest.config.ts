@@ -7,7 +7,6 @@ export default defineConfig({
     include: ["packages/*/src/**/*.{test,spec}.{ts,tsx,js,jsx}"],
     // Playwright specs live in e2e/ and run with `npm run test:e2e`.
     exclude: [...configDefaults.exclude, "e2e/**"],
-    passWithNoTests: true,
     coverage: {
       provider: "v8",
       include: ["packages/*/src/**/*.{ts,tsx,js,jsx}"],
