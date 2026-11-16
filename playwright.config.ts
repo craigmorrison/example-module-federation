@@ -13,7 +13,7 @@ const servers = [
     command: "npm run dev -w app-counter",
     url: "http://localhost:3002/counter-remote-entry.js",
   },
-  // app-people-list runs tsc + vite build + preview, so allow it longer to start.
+  // app-people-list runs Vite's dev server; its manifest is served at the same URL as a build's.
   {
     name: "people",
     command: "npm run dev -w app-people-list",

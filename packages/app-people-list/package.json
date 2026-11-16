@@ -12,7 +12,8 @@
   "type": "module",
   "main": "src/index.tsx",
   "scripts": {
-    "dev": "tsc && vite build -c ./vite.config.js && vite preview -c ./vite.config.js --port 3003 --strictPort",
+    "dev": "vite -c ./vite.config.js",
+    "preview": "vite preview -c ./vite.config.js",
     "build": "tsc && vite build -c ./vite.config.js",
     "test": "vitest run"
   },
