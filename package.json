@@ -20,7 +20,8 @@
     "lint": "oxlint .",
     "format": "oxfmt .",
     "format:check": "oxfmt --check .",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:e2e:ssr-prod": "playwright test -c playwright.ssr-prod.config.ts"
   },
   "devDependencies": {
     "@module-federation/enhanced": "^2.9.3",

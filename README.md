@@ -124,6 +124,7 @@ npm run build         # All packages (each uses its own bundler, in production m
 ```shell
 npm test                 # Vitest (unit tests)
 npm run test:e2e         # Playwright smoke tests for both shells (starts all dev servers; local only, not in CI)
+npm run test:e2e:ssr-prod # Production SSR shell against the built people remote, via MF_REMOTES (local only, not in CI)
 npm run lint             # Lint (oxlint)
 npm run format:check     # Format check (oxfmt)
 npm run format           # Format all files (oxfmt)

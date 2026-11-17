@@ -43,7 +43,7 @@ export default defineConfig({
   projects: [
     {
       name: "chromium",
-      testIgnore: /ssr\.spec\.ts$/,
+      testIgnore: [/ssr\.spec\.ts$/, /ssr-prod\.spec\.ts$/],
       use: { ...devices["Desktop Chrome"], baseURL: "http://localhost:3000" },
     },
     {
