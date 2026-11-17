@@ -16,3 +16,5 @@ coverage
 
 # Build directory
 dist
+# Intermediate SSR environment build (its entry is copied into dist)
+dist-ssr

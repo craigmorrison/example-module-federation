@@ -33,4 +33,17 @@ export default defineConfig({
     target: "esnext",
     outDir: "dist",
   },
+  // Build the ssr environment too, so `vite build` also emits the SSR remote entry
+  // (people-remote-entry.ssr.js) next to the browser one and advertises it in
+  // mf-manifest.json as metaData.ssrRemoteEntry, for hosts that render on the server.
+  builder: {},
+  environments: {
+    ssr: {
+      build: {
+        outDir: "dist-ssr",
+        // The SSR build needs an entry of its own; the plugin adds the SSR remote entry.
+        rolldownOptions: { input: federationConfig.exposes["./People"] },
+      },
+    },
+  },
 });
