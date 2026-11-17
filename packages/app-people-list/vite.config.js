@@ -40,6 +40,8 @@ export default defineConfig({
   environments: {
     ssr: {
       build: {
+        // Scratch output: the plugin copies the SSR entry and its chunks into dist/ during
+        // the build, and nothing reads dist-ssr/ afterwards, so it isn't a turbo output.
         outDir: "dist-ssr",
         // The SSR build needs an entry of its own; the plugin adds the SSR remote entry.
         rolldownOptions: { input: federationConfig.exposes["./People"] },
