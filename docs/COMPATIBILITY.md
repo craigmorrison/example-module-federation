@@ -51,7 +51,7 @@ There are two valid migration orders. Which one you use depends on your shared m
 
 **Key point**: `eager` is a build-time decision that changes the webpack chunk graph. It cannot be negotiated at runtime. Changing it during migration changes how chunks are structured and can break other producers that depend on the loading order.
 
-**Cross-bundler note**: `eager` has no meaning in Vite's dev server (native ESM). `@module-federation/vite` handles shared modules differently during `vite dev` vs production builds. The config is honoured in production.
+**Cross-bundler note**: `@module-federation/vite` handles shared modules through a different code path in `vite dev` than in a production build. This repo sets no `eager` anywhere, so how Vite's dev server treats it has not been exercised here.
 
 ### `singleton`
 
@@ -216,21 +216,22 @@ Rspack uses `builtin:swc-loader` instead of `swc-loader` but this only affects b
 
 ### Webpack/Rspack ↔ Vite
 
-`@module-federation/vite` bridges Vite's native ESM architecture with the MF shared scope protocol. Key differences:
+`@module-federation/vite` bridges Vite's native ESM architecture with the MF shared scope protocol. What this repo has checked (Vite 8.3.8 on Rolldown + Oxc, `@module-federation/vite` 1.24.0):
 
-| Behavior            | Webpack/Rspack                          | Vite                                                                                                                |
-| ------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `eager: true`       | Module bundled into the entry chunk     | **Ignored in dev** (native ESM). Honoured in production build.                                                      |
-| `singleton: true`   | Enforced via shared scope at runtime    | Enforced in production. In dev, depends on Vite's module resolution.                                                |
-| `requiredVersion`   | Checked at runtime                      | Checked at runtime in production. **Not checked in dev.**                                                           |
-| Dev server          | webpack-dev-server / @rspack/dev-server | Vite dev server (native ESM, no bundling)                                                                           |
-| Remote entry format | Standard `remoteEntry.js`               | Standard `remoteEntry.js` (production)                                                                              |
-| Chunk splitting     | Respects `eager` flag                   | `@module-federation/vite` manages chunks automatically — `build.rollupOptions.output.manualChunks` must not be used |
+| Behavior            | Webpack/Rspack                          | Vite                                                                                                                                                                          |
+| ------------------- | --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `singleton: true`   | Enforced via shared scope at runtime    | Enforced in production and in dev (verified: in the Rspack shell, people's `react` and `react-dom` resolve from the shell in both).                                           |
+| `requiredVersion`   | Checked at runtime                      | Published in the manifest in dev and production (`^19.3.1`). A mismatch has not been tested here.                                                                             |
+| `eager: true`       | Module bundled into the entry chunk     | Not used or tested here.                                                                                                                                                      |
+| Dev server          | webpack-dev-server / @rspack/dev-server | Vite dev server (native ESM). It serves `mf-manifest.json` and an ES module remote entry that non-Vite consumers can load (verified with the Rspack shell).                   |
+| Remote entry format | Classic script `remoteEntry.js`         | ES module remote entry (`"type": "module"` in the manifest), plus an SSR remote entry (`metaData.ssrRemoteEntry`) in dev and, with an `ssr` environment build, in production. |
+| Chunk splitting     | Respects `eager` flag                   | Per plugin docs, `@module-federation/vite` manages code splitting itself, so don't set your own `manualChunks` / `codeSplitting` without reading its README.                  |
 
 **Practical implications**:
 
-- In production builds, all three bundlers produce compatible remote entries and negotiate shared modules the same way
-- In dev, Vite behaves differently — shared modules may be duplicated or resolved differently than in webpack/rspack. **Always test shared module behavior with production builds**, not just dev servers
+- In production builds, all three bundlers produce remote entries that the same runtime loads, and shared modules negotiate the same way.
+- Vite's dev server works as a remote for a non-Vite consumer, but dev is still a different code path. For example, in dev the people remote evaluates its own `react-dom/client` fallback, because the Rspack shell doesn't share that subpath. Rendering still uses the shell's `react-dom`. **Check shared-module behaviour against production builds too**, not only dev servers.
+- With a non-Vite consumer, `@vitejs/plugin-react`'s Fast Refresh preamble never runs on the page, and in dev every transformed component throws `can't detect preamble`. `app-people-list` stubs the globals that check reads in its exposed module (`refresh-preamble.ts`). See [BUNDLER-COMPARISON.md](BUNDLER-COMPARISON.md).
 - Version strings must be valid semver for cross-bundler negotiation to work. Non-semver strings (git hashes, `"latest"`, `"workspace:*"`) break negotiation silently
 
 ---
@@ -266,7 +267,7 @@ The dynamic `import()` creates an async chunk boundary. When webpack/rspack enco
 
 - **MF 2 with `asyncStartup: true`**: the plugin adds the async boundary for you.
 - **`eager: true` on all shared modules in all packages**: The modules are bundled into the entry chunk, so no async resolution is needed. But every remote then carries its own copy of React, which defeats sharing, so avoid it.
-- **Vite in dev mode**: `@module-federation/vite` handles the async boundary internally. But you still need the pattern for webpack/rspack compatibility.
+- **Vite**: `@module-federation/vite` adds the async boundary itself, in dev and in builds (its runtime init uses top-level await). One consequence, seen in this repo: a Vite entry that waits for `DOMContentLoaded` may never render, because the event can fire before the entry runs. Render straight away instead.
 
 ### Common mistakes
 
@@ -302,6 +303,6 @@ Keep `eager` off (the default) and rely on the async boundary (`asyncStartup` on
 ### For cross-bundler setups
 
 1. **Use `federation.config.js`** per producer — a single source of truth consumed by webpack, rspack, and vite configs
-2. **Always test with production builds** — dev server behavior differs across bundlers, especially Vite
+2. **Test with production builds too** — dev servers take different code paths from builds, Vite's included, even though Vite's dev server now works as a remote
 3. **Use semver version strings everywhere** — non-semver breaks cross-bundler negotiation
 4. **Pin `@module-federation/enhanced` to the same version** across all v2 packages — runtime version mismatches can cause subtle negotiation bugs

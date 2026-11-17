@@ -1,7 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
 
-// Local / full-tier smoke test: starts every producer plus the shell, then drives the
-// shell in a browser. Not part of CI. Run with `npm run test:e2e`.
+// Local / full-tier smoke test: starts every producer plus both shells (Rspack on :3000,
+// React Router SSR on :4000), then drives them in a browser. Not part of CI. Run with
+// `npm run test:e2e`.
 const servers = [
   {
     name: "table",
@@ -13,7 +14,7 @@ const servers = [
     command: "npm run dev -w app-counter",
     url: "http://localhost:3002/counter-remote-entry.js",
   },
-  // app-people-list runs tsc + vite build + preview, so allow it longer to start.
+  // app-people-list runs Vite's dev server; its manifest is served at the same URL as a build's.
   {
     name: "people",
     command: "npm run dev -w app-people-list",
@@ -24,6 +25,11 @@ const servers = [
     command: "npm run dev -w portal-shell",
     url: "http://localhost:3000/remotes.json",
   },
+  {
+    name: "shell-ssr",
+    command: "npm run dev -w portal-shell-ssr",
+    url: "http://localhost:4000/",
+  },
 ];
 
 export default defineConfig({
@@ -32,10 +38,20 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   reporter: [["list"]],
   use: {
-    baseURL: "http://localhost:3000",
     trace: "retain-on-failure",
   },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  projects: [
+    {
+      name: "chromium",
+      testIgnore: [/ssr\.spec\.ts$/, /ssr-prod\.spec\.ts$/],
+      use: { ...devices["Desktop Chrome"], baseURL: "http://localhost:3000" },
+    },
+    {
+      name: "ssr",
+      testMatch: /ssr\.spec\.ts$/,
+      use: { ...devices["Desktop Chrome"], baseURL: "http://localhost:4000" },
+    },
+  ],
   webServer: servers.map(({ name, command, url }) => ({
     name,
     command,

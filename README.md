@@ -24,9 +24,9 @@ A proof of concept showing Module Federation working across **Webpack**, **Rspac
    └─────────────────┘ └─────────────────┘ └──────────────────┘
 
               ┌──────────────────┐
-              │ portal-shell-ssr │  (experimental SSR shell,
-              │  MF 2 runtime    │   remotes load as client islands)
-              │  SSR via RR7     │
+              │ portal-shell-ssr │  (SSR shell: server-renders people
+              │ MF 2, vite plugin│   from its SSR entry; table and
+              │  SSR via RR8     │   counter load as client islands)
               │  :4000           │
               └──────────────────┘
 ```
@@ -37,7 +37,7 @@ Three producers, three different bundlers, one consumer that loads them at runti
 2. **v1/v2 coexistence**: `app-counter` is deliberately still on native webpack MF v1 and has no manifest, so the shell loads it from its plain remote entry. The MF 2 producers are loaded from `mf-manifest.json`
 3. **Runtime configuration**: no remote URL is baked into the shell build, see [Remotes config](#remotes-config)
 4. **Failure isolation**: each remote route has its own error boundary, so a remote that is down shows a retryable fallback instead of taking the shell down
-5. **SSR prototype**: `portal-shell-ssr` server-renders the shell chrome and loads the remotes client-side. Remote loading works in `react-router dev` (see [SSR consumer](#ssr-consumer))
+5. **SSR of federated remotes**: `portal-shell-ssr` server-renders the people remote through its SSR remote entry, and loads table and counter, which have none, client-side. This works in `react-router dev` and in a production build (see [SSR consumer](#ssr-consumer))
 
 ## Stack
 
@@ -49,7 +49,7 @@ Three producers, three different bundlers, one consumer that loads them at runti
 | [Vite 8](https://vite.dev/)                           | Producer bundler (app-people-list) + SSR consumer |
 | [SWC](https://swc.rs/)                                | Transpiler (replaces Babel)                       |
 | [React 19](https://react.dev/)                        | UI framework                                      |
-| [React Router 7](https://reactrouter.com/)            | Routing (SSR consumer uses framework mode)        |
+| [React Router 8](https://reactrouter.com/)            | Routing (SSR consumer uses framework mode)        |
 | [Turborepo](https://turbo.build/)                     | Monorepo task runner                              |
 | [Vitest](https://vitest.dev/)                         | Test runner                                       |
 | [oxlint](https://oxc.rs/) + [oxfmt](https://oxc.rs/)  | Linter + formatter                                |
@@ -70,7 +70,7 @@ npx playwright install chromium   # only needed for the e2e test
 
 ```shell
 npm run dev           # SPA consumer (:3000) + all producers
-npm run dev:ssr       # SSR consumer (:4000) + all producers (experimental)
+npm run dev:ssr       # SSR consumer (:4000) + all producers
 ```
 
 `dev` starts:
@@ -78,7 +78,7 @@ npm run dev:ssr       # SSR consumer (:4000) + all producers (experimental)
 - **http://localhost:3000**: SPA consumer (rspack, MF 2)
 - `:3001`: app-table (rspack producer, `mf-manifest.json`)
 - `:3002`: app-counter (webpack producer, MF v1 remote entry)
-- `:3003`: app-people-list (vite producer, build + preview, `mf-manifest.json`)
+- `:3003`: app-people-list (vite producer, Vite dev server, `mf-manifest.json`)
 
 Navigate to `/table`, `/counter`, `/people`.
 
@@ -96,7 +96,20 @@ The shell build contains no remote URLs. On start, `src/bootstrap.jsx` fetches `
 
 An entry ending in `.json` is an MF 2 manifest. Anything else is treated as a plain remote entry script, which is what the native v1 counter needs.
 
-To point at another environment, build the shell once and serve a different `remotes.json` next to it (replace the file in `packages/portal-shell/dist/`, or have your host/CDN serve one per environment). The SSR shell reads `packages/portal-shell-ssr/public/remotes.json` the same way.
+To point at another environment, build the shell once and serve a different `remotes.json` next to it (replace the file in `packages/portal-shell/dist/`, or have your host/CDN serve one per environment). The SSR shell works the same way without a rebuild, through an environment variable:
+
+- `packages/portal-shell-ssr/remotes.json` is the build-time default. `vite.config.ts` passes it to `@module-federation/vite`, which needs the remotes at build time to set up sharing and the server-side runtime.
+- At startup the server reads `MF_REMOTES`, either a JSON object or the path to a JSON file, and merges it over that default. Remotes it doesn't name keep their default entry:
+
+  ```shell
+  MF_REMOTES='{"people":"https://cdn.example.com/people/mf-manifest.json"}' npm start -w portal-shell-ssr
+  MF_REMOTES=/etc/portal/remotes.json npm start -w portal-shell-ssr
+  ```
+
+- The server registers the merged map with `registerRemotes()` (`app/remotes.server.ts`). The root loader writes the same map into the page, and the client entry registers it before hydrating, so the browser loads each remote from the same place the server rendered it from.
+- Remotes are loaded with `loadRemote()`, which honours runtime registrations. A plain `import("people/People")` would stay bound to the build-time entry.
+
+`app-people-list`'s `dev` runs Vite's dev server, which serves the same `mf-manifest.json` URL as a build. To try the built remote instead, run `npm run build -w app-people-list && npm run preview -w app-people-list`.
 
 Producers use `publicPath: "auto"`, so their assets resolve relative to wherever their entry was loaded from. `app-people-list` builds with a relative Vite `base` for that reason. Set `PUBLIC_URL` when building it (for example `PUBLIC_URL=https://cdn.example.com/people/ npm run build -w app-people-list`) to pin an absolute URL instead.
 
@@ -110,13 +123,14 @@ npm run build         # All packages (each uses its own bundler, in production m
 
 ```shell
 npm test                 # Vitest (unit tests)
-npm run test:e2e         # Playwright smoke test (starts all dev servers; local only, not in CI)
+npm run test:e2e         # Playwright smoke tests for both shells (starts all dev servers; local only, not in CI)
+npm run test:e2e:ssr-prod # Production SSR shell against the built people remote, via MF_REMOTES (local only, not in CI)
 npm run lint             # Lint (oxlint)
 npm run format:check     # Format check (oxfmt)
 npm run format           # Format all files (oxfmt)
 ```
 
-The e2e test visits `/table`, `/counter` and `/people` and checks each remote renders (the people remote's SWAPI call is served from a fixture), and checks that the shell keeps working and shows a fallback with a Retry button when one remote is unreachable. It needs ports 3000 to 3003 free (or already serving the dev servers) and a one-off `npx playwright install chromium`.
+The `chromium` project (`e2e/portal.spec.ts`) drives the Rspack shell: it visits `/table`, `/counter` and `/people` and checks each remote renders (the people remote's SWAPI call is served from a fixture), and checks that the shell keeps working and shows a fallback with a Retry button when one remote is unreachable. The `ssr` project (`e2e/ssr.spec.ts`) drives the SSR shell: it checks that the server HTML for `/people` holds the remote's markup, that table and counter are client-side placeholders in it, and that every route renders and hydrates in the browser without console errors. The server render never calls SWAPI, because React Query doesn't fetch during SSR. The tests need ports 3000 to 3003 and 4000 free (or already serving the dev servers) and a one-off `npx playwright install chromium`.
 
 ## How federation works across bundlers
 
@@ -128,9 +142,13 @@ The shell uses `shareStrategy: "loaded-first"`. The default (`version-first`) lo
 
 ### SSR consumer
 
-The SSR consumer (`portal-shell-ssr`) uses React Router 7 in framework mode. The shell chrome (nav, header, layout) is server-rendered for fast first paint. Federated producers load as client-only islands: the server renders a loading placeholder, then the MF runtime loads the producer's component after hydration.
+The SSR consumer (`portal-shell-ssr`) uses React Router 8 in framework mode on Vite, with `federation()` from `@module-federation/vite` next to `reactRouter()` in `vite.config.ts`. The plugin shares React and ReactDOM as singletons and sets up the federation runtime in the browser and on the server. The shell registers the remotes at runtime (see [Remotes config](#remotes-config)) and loads them with `loadRemote()`.
 
-This uses `@module-federation/runtime` directly (not a build plugin) to avoid conflicts with React Router 7's Vite plugin. React and react-dom are passed to `init()` as `shared.lib` factories, which is what lets the remotes load in `react-router dev` without a webpack share scope. Remote loading works in dev for all three producers. Only the dev server has been checked against live remotes; the production server (`npm start -w portal-shell-ssr`) has not.
+- **people** publishes an SSR remote entry (`people-remote-entry.ssr.js`, listed in its manifest as `metaData.ssrRemoteEntry`), so `/people` is rendered on the server and hydrated in the browser. React Query doesn't fetch on the server, so the server HTML holds the list's loading state.
+- **table** and **counter** publish no SSR entry, so they stay client-only islands: the server renders a placeholder and the browser loads them after hydration.
+- If a remote can't be rendered on the server (it's down, or has no SSR entry), only its Suspense boundary falls back to client rendering. The page still returns 200.
+
+This works in `react-router dev` and in production (`npm run build -w portal-shell-ssr && PORT=4001 npm start -w portal-shell-ssr`, against built producers). See [docs/BUNDLER-COMPARISON.md](docs/BUNDLER-COMPARISON.md) for what changed and what was checked.
 
 ## Migration challenges: shared modules
 

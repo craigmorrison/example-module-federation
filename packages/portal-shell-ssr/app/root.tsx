@@ -1,6 +1,25 @@
-import { Links, Meta, Outlet, Scripts, ScrollRestoration, NavLink } from "react-router";
+import {
+  Links,
+  Meta,
+  NavLink,
+  Outlet,
+  Scripts,
+  ScrollRestoration,
+  useRouteLoaderData,
+} from "react-router";
+import { remotes } from "./remotes.server";
+
+export function loader() {
+  return { remotes };
+}
+
+/** JSON that is safe inside an inline <script>. */
+function scriptJson(value: unknown) {
+  return JSON.stringify(value).replace(/</g, "\\u003c");
+}
 
 export function Layout({ children }: { children: React.ReactNode }) {
+  const remotes = useRouteLoaderData<typeof loader>("root")?.remotes;
   return (
     <html lang="en">
       <head>
@@ -8,6 +27,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
+        {remotes && (
+          // Runs before the client entry (a deferred module), which registers the same
+          // remotes before hydrating, so the browser loads what the server rendered.
+          <script
+            dangerouslySetInnerHTML={{ __html: `window.__MF_REMOTES__ = ${scriptJson(remotes)};` }}
+          />
+        )}
         <style
           dangerouslySetInnerHTML={{
             __html: `
