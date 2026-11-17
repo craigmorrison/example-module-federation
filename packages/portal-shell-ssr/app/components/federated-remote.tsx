@@ -7,22 +7,18 @@ import {
   type ComponentType,
   type ReactNode,
 } from "react";
+import { loadRemote } from "@module-federation/runtime";
 
 type RemoteModule = { default: ComponentType };
 
-// Importing a remote by its id lets @module-federation/vite see which remotes are used:
-// it registers them with the runtime and rewrites each import to load the remote, from
-// its browser entry in the browser and from its SSR entry on the server.
-const remoteModules = {
-  "table/Table": () => import("table/Table"),
-  "counter/Counter": () => import("counter/Counter"),
-  "people/People": () => import("people/People"),
-} satisfies Record<string, () => Promise<RemoteModule>>;
+/** Remote module ids; the remotes are registered at runtime (see app/remotes.ts). */
+export type RemoteId = "table/Table" | "counter/Counter" | "people/People";
 
-export type RemoteId = keyof typeof remoteModules;
-
+// loadRemote rather than import("people/People"): the plugin binds a remote import to
+// the build-time entry, while loadRemote honours remotes registered at runtime. On the
+// server it loads a remote's SSR entry, in the browser its browser entry.
 async function loadRemoteComponent(remote: RemoteId): Promise<RemoteModule> {
-  const mod = await remoteModules[remote]();
+  const mod = await loadRemote<RemoteModule>(remote);
   if (!mod?.default) {
     throw new Error(`Remote "${remote}" did not export a default component`);
   }

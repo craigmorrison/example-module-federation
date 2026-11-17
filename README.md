@@ -96,7 +96,18 @@ The shell build contains no remote URLs. On start, `src/bootstrap.jsx` fetches `
 
 An entry ending in `.json` is an MF 2 manifest. Anything else is treated as a plain remote entry script, which is what the native v1 counter needs.
 
-To point at another environment, build the shell once and serve a different `remotes.json` next to it (replace the file in `packages/portal-shell/dist/`, or have your host/CDN serve one per environment). The SSR shell is different: it passes `packages/portal-shell-ssr/remotes.json` to `@module-federation/vite` at build time.
+To point at another environment, build the shell once and serve a different `remotes.json` next to it (replace the file in `packages/portal-shell/dist/`, or have your host/CDN serve one per environment). The SSR shell works the same way without a rebuild, through an environment variable:
+
+- `packages/portal-shell-ssr/remotes.json` is the build-time default. `vite.config.ts` passes it to `@module-federation/vite`, which needs the remotes at build time to set up sharing and the server-side runtime.
+- At startup the server reads `MF_REMOTES`, either a JSON object or the path to a JSON file, and merges it over that default. Remotes it doesn't name keep their default entry:
+
+  ```shell
+  MF_REMOTES='{"people":"https://cdn.example.com/people/mf-manifest.json"}' npm start -w portal-shell-ssr
+  MF_REMOTES=/etc/portal/remotes.json npm start -w portal-shell-ssr
+  ```
+
+- The server registers the merged map with `registerRemotes()` (`app/remotes.server.ts`). The root loader writes the same map into the page, and the client entry registers it before hydrating, so the browser loads each remote from the same place the server rendered it from.
+- Remotes are loaded with `loadRemote()`, which honours runtime registrations. A plain `import("people/People")` would stay bound to the build-time entry.
 
 `app-people-list`'s `dev` runs Vite's dev server, which serves the same `mf-manifest.json` URL as a build. To try the built remote instead, run `npm run build -w app-people-list && npm run preview -w app-people-list`.
 
@@ -130,7 +141,7 @@ The shell uses `shareStrategy: "loaded-first"`. The default (`version-first`) lo
 
 ### SSR consumer
 
-The SSR consumer (`portal-shell-ssr`) uses React Router 8 in framework mode on Vite, with `federation()` from `@module-federation/vite` next to `reactRouter()` in `vite.config.ts`. The plugin registers the remotes and shares React and ReactDOM as singletons, in the browser and on the server.
+The SSR consumer (`portal-shell-ssr`) uses React Router 8 in framework mode on Vite, with `federation()` from `@module-federation/vite` next to `reactRouter()` in `vite.config.ts`. The plugin shares React and ReactDOM as singletons and sets up the federation runtime in the browser and on the server. The shell registers the remotes at runtime (see [Remotes config](#remotes-config)) and loads them with `loadRemote()`.
 
 - **people** publishes an SSR remote entry (`people-remote-entry.ssr.js`, listed in its manifest as `metaData.ssrRemoteEntry`), so `/people` is rendered on the server and hydrated in the browser. React Query doesn't fetch on the server, so the server HTML holds the list's loading state.
 - **table** and **counter** publish no SSR entry, so they stay client-only islands: the server renders a placeholder and the browser loads them after hydration.
